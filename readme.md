@@ -1,27 +1,50 @@
-# Laravel PHP Framework
+# Project 4: Developer's Best Friend
 
-[![Build Status](https://travis-ci.org/laravel/framework.svg)](https://travis-ci.org/laravel/framework)
-[![Total Downloads](https://poser.pugx.org/laravel/framework/d/total.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Stable Version](https://poser.pugx.org/laravel/framework/v/stable.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Unstable Version](https://poser.pugx.org/laravel/framework/v/unstable.svg)](https://packagist.org/packages/laravel/framework)
-[![License](https://poser.pugx.org/laravel/framework/license.svg)](https://packagist.org/packages/laravel/framework)
+## Live URL
+<http://p3.jonnymoon.com>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as authentication, routing, sessions, queueing, and caching.
+## Description
+This website provides a few tools to help in web development. 
+* Lorem Ipsum - Generate lorem ipsum text blocks.
+* Password Generator - Create a memorable password that needs to match certain rules.
+* User Generator - Generate user content for UI mock ups.
+* Image Generator - Resize images and adjust quality.
 
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications. A superb inversion of control container, expressive migration system, and tightly integrated unit testing support give you the tools you need to build any application with which you are tasked.
+## Demo
+<https://youtu.be/CoPVCPMQxHs>
 
-## Official Documentation
+## Details for teaching team
+The website is responsive. I converted/included the password generator from project 2.
+I also created an image generator that can resize an uploaded image. As part of the 
+image generator, I created a cache that clears out expired images so that images remain
+on the server only for a short time.
 
-Documentation for the framework can be found on the [Laravel website](http://laravel.com/docs).
+I created a custom validator that I use for all of the controllers to validate the data.
+If there is invalid data, it is usually auto-corrected to the default value and processed normally.
 
-## Contributing
+As part of the user generator, I added the ability to export the data in JSON format. This is 
+useful for using the user content in a variety of programming languages.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](http://laravel.com/docs/contributions).
+I also added a JSON Formatter tool. It has a couple of display modes. It allows the user to display 
+the JSON using "fullscreen" without the website header and footer. The editor uses the Ace editor.
+I chose to use the Ace editor because I like how it can highlight the JSON and give visual indications 
+of errors.
 
-## Security Vulnerabilities
+## Outside Code, Resources, and Packages
+* Bootstrap: http://getbootstrap.com/
+* Google Fonts: https://fonts.google.com/
+* Font Awesome: http://fontawesome.io/
+* Password Word List: http://www.wordfrequency.info/
+* Lorem Ipsum Text: http://www.lipsum.com/
+* First and Last Names: http://names.mongabay.com
+* City, State, Zipcode: http://federalgovernmentzipcodes.us/
+* Addresses: https://www.randomlists.com/random-addresses
+* User Content Profile Images: http://uifaces.com
+* JSON Editor: https://ace.c9.io
+* Intervention Image: http://image.intervention.io/
+* Webmozart JSON: https://github.com/webmozart/json
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
 
-## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT).
+
+Planning Doc: https://docs.google.com/document/d/1ug1JlBP5GDxUHdlynbw9jHRmLjOwX79nr4yGDpMla3Y/edit?usp=sharing
