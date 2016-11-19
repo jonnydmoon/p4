@@ -155,7 +155,7 @@ var drawingApp = (function () {
 						mouseY = (e.changedTouches ? e.changedTouches[0].pageY : e.pageY) - this.offsetTop;
 
 
-					console.log(e.pageY,this.offsetTop, this);	
+					console.log("Mouse", mouseX, mouseY);	
 
 
 					if (curTool === "bucket") {
@@ -231,20 +231,56 @@ var drawingApp = (function () {
 			}
 		},
 
+		
+
+		init = function(id, width, height, baseAssetUrl, outlineUrl, colorUrl){
+			outlineImage.onload = function () {
+				outlineImage.onload = null;
+				console.log('LOADED', outlineImage.width, outlineImage.height);
+
+				var outlineHeight = outlineImage.height;
+				var outlineWidth = outlineImage.width;
+
+				var $canvas = $('#' + id);
+				var availableHeight = $canvas.height();
+				var availableWidth = $canvas.width();
+
+
+				var outlineRatio = outlineHeight/outlineWidth;
+				var availableRatio = availableHeight/availableWidth;
+
+				var ratio = availableWidth/outlineWidth;
+
+				if(availableRatio < outlineRatio){
+					ratio = availableHeight/outlineHeight;
+				}
+
+				var newWidth = Math.round(outlineWidth * ratio);
+				var newHeight = Math.round(outlineHeight * ratio);
+
+				$canvas.width(newWidth);
+				$canvas.height(newHeight);
+
+				init2(id, newWidth, newHeight, baseAssetUrl, outlineUrl, colorUrl);
+
+			};
+			outlineImage.src = outlineUrl;
+
+		},
+
+
 		// Creates a canvas element, loads images, adds events, and draws the canvas for the first time.
-		init = function (id, width, height, baseAssetUrl, outlineUrl, colorUrl) {
+		init2 = function (id, width, height, baseAssetUrl, outlineUrl, colorUrl) {
 
 
-			width = window.innerWidth - 1;
-			height = window.innerHeight - 1;
+			//width = window.innerWidth - 1;
+			//height = window.innerHeight - 1;
 
 
-			var canvasElement;
 
-			if (width && height) {
-				canvasWidth = width;
-				canvasHeight = height;
-			}
+			canvasWidth = width;
+			canvasHeight = height;
+			
 
 
 			// Create the canvas (Neccessary for IE because it doesn't know what a canvas element is)
@@ -264,10 +300,11 @@ var drawingApp = (function () {
 			resourcesLoadingCount++;
 			outlineImage.onload = function () {
 
-				contexts.outline.drawImage(outlineImage, 0, 0, outlineImage.width,  outlineImage.height);
+				contexts.outline.drawImage(outlineImage, 0, 0, canvasWidth,  canvasHeight);
 				// Test for cross origin security error (SECURITY_ERR: DOM Exception 18)
 				try {
 					outlineLayerData = contexts.outline.getImageData(0, 0, canvasWidth, canvasHeight);
+
 					if(!colorUrl){
 						colorLayerData = contexts.drawing.getImageData(0, 0, canvasWidth, canvasHeight); // I think this should be the outline?
 					}
@@ -288,7 +325,7 @@ var drawingApp = (function () {
 			resourcesLoadingCount++;
 			coloredImage.onload = function () {
 
-				contexts.drawing.drawImage(coloredImage, 0, 0, coloredImage.width,  coloredImage.height);
+				contexts.drawing.drawImage(coloredImage, 0, 0, canvasWidth,  canvasHeight);
 				// Test for cross origin security error (SECURITY_ERR: DOM Exception 18)
 				try {
 					//outlineLayerData = contexts.outline.getImageData(0, 0, canvasWidth, canvasHeight);
@@ -458,6 +495,8 @@ var drawingApp = (function () {
 
 		var canvasWidth = colorContext.canvas.width;
 		var canvasHeight = colorContext.canvas.height;
+
+		console.log('x', startX, 'y', startY, canvasWidth, canvasHeight)
 
 		var newPos,
 			x,

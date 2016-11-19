@@ -1,6 +1,9 @@
 var currentColor = '#b11f24';
-drawingApp.setColor(currentColor);
 var currentTool = 'marker';
+var currentSize = 40;
+
+drawingApp.setColor(currentColor);
+drawingApp.setSize(currentSize);
 
 function render(){
 	var colors = [
@@ -37,8 +40,9 @@ function render(){
 	
 	$('.selected-tool').removeClass('selected-tool');
 	$('[data-tool=' + currentTool + ']').addClass('selected-tool');
-
 	$('#paints').html(svgs.join(''));
+	$('body').attr('data-brush', currentSize);
+	$('body').attr('data-tool', currentTool);
 }
 
 render();
@@ -53,9 +57,21 @@ $('#tools').on('click', function(e){
 	currentTool = $(e.target).closest('svg').attr('data-tool');
 	drawingApp.setTool(currentTool);
 	render();
+});
+
+$('.brush-size').on('click', function(e){
+	currentSize = $(e.target).closest('circle').attr('data-brush');
+	drawingApp.setSize(currentSize);
+	render();
 })
 
-function save(){
+$('.save-page-button').on('click', function(e){
+	var name = prompt("Please give this page a name", 'My Coloring Page');
+	save(name);
+})
+
+function save(name){
+	$('#hidden-name-field').val(name);
 	$('#hidden-img-field').val(drawingApp.save());
 	$('#color-form').get(0).submit();
 }

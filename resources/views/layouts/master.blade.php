@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	 <title>
 		{{-- Yield the title if it exists, otherwise show default --}}
-		@yield('title','Developer\'s Best Friend')
+		@yield('title','Coloring Pages')
 	</title>
 	
 
@@ -31,7 +31,6 @@
 
 			@yield('toolset', '')
 
-			<div class='crayon-border'></div>
 	</header>
 	<main class="main-content">
 		{{-- Global error section --}}

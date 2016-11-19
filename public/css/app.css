@@ -1,8 +1,9 @@
 h1{
-	font-weight:100; 
-	color:#545454;
-	margin-left:25px;
-	font-size:60px;
+	   font-weight: 100;
+    color: #545454;
+    margin: 15px 25px;
+    font-size: 37px;
+    border-bottom: solid 1px #dedede;
 }
 
 .paint-circle {
@@ -11,6 +12,10 @@ h1{
 	opacity:.85;
 	transition: opacity 400ms;
 	margin-right:5px;
+}
+
+.paint-circle circle:hover {
+	cursor:pointer;
 }
 
 .paint-circle:hover { 
@@ -57,10 +62,19 @@ body {
 	display:flex;
 	flex-direction:column;
 	margin-top:10px;
+	margin-right:25px;
 }
 
 #tools svg{
 	opacity:.3;
+	margin-bottom:5px;
+	cursor:pointer;
+}
+
+#tools svg:hover{
+	opacity:.7;
+
+
 }
 
 #tools svg.selected-tool{
@@ -78,8 +92,15 @@ body {
     transition: opacity .5s, box-shadow .5s;
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.7);
 
-    font-family: 'Shadows Into Light Two', cursive;;
+    font-family: 'Shadows Into Light Two', cursive;
     font-size:48px;
+
+	font-family: 'Open Sans', sans-serif;
+    font-size:30px;
+    color:#030303;
+    font-weight:100;
+
+
     padding:10px;
     cursor:pointer;
     border-left: solid 15px #095634;
@@ -90,6 +111,8 @@ body {
 .book:hover, .page:hover {
     opacity: 1;
     box-shadow: 0px 20px 10px rgba(0, 0, 0, 0.3);
+    text-decoration: none;
+    color:#030303;
 }
 
 .page{
@@ -103,7 +126,90 @@ body {
 }
 
 
+[data-tool="marker"][data-brush="5"]   #canvas-div{ cursor: url('../images/brush-5.png') 2.5 2.5, default; }
+[data-tool="marker"][data-brush="10"]  #canvas-div{ cursor: url('../images/brush-10.png') 5 5, default; }
+[data-tool="marker"][data-brush="20"]  #canvas-div{ cursor: url('../images/brush-20.png') 10 10, default; }
+[data-tool="marker"][data-brush="40"]  #canvas-div{ cursor: url('../images/brush-40.png') 20 20, default; }
+[data-tool="marker"][data-brush="60"]  #canvas-div{ cursor: url('../images/brush-60.png') 30 30, default; }
+[data-tool="marker"][data-brush="100"] #canvas-div{	cursor: url('../images/brush-100.png') 50 50, default; }
+
+[data-tool="eraser"][data-brush="5"]   #canvas-div{ cursor: url('../images/eraser-5.png') 2.5 2.5, default; }
+[data-tool="eraser"][data-brush="10"]  #canvas-div{ cursor: url('../images/eraser-10.png') 5 5, default; }
+[data-tool="eraser"][data-brush="20"]  #canvas-div{ cursor: url('../images/eraser-20.png') 10 10, default; }
+[data-tool="eraser"][data-brush="40"]  #canvas-div{ cursor: url('../images/eraser-40.png') 20 20, default; }
+[data-tool="eraser"][data-brush="60"]  #canvas-div{ cursor: url('../images/eraser-60.png') 30 30, default; }
+[data-tool="eraser"][data-brush="100"] #canvas-div{	cursor: url('../images/eraser-100.png') 50 50, default; }
+
+[data-tool="bucket"] #canvas-div{	cursor: url('../images/wand.png') 6 6, default; }
+
+
+.brush-size{
+	height:100px;
+}
+
+[data-brush="5"]   circle[data-brush="5"],
+[data-brush="10"]  circle[data-brush="10"],
+[data-brush="20"]  circle[data-brush="20"],
+[data-brush="40"]  circle[data-brush="40"],
+[data-brush="60"]  circle[data-brush="60"],
+[data-brush="100"] circle[data-brush="100"] {
+	fill:black;
+	opacity:.6;
+}
+
+circle[data-brush="5"],
+circle[data-brush="10"],
+circle[data-brush="20"],
+circle[data-brush="40"],
+circle[data-brush="60"],
+circle[data-brush="100"] {
+
+	opacity:.2;
+}
+
+circle[data-brush="5"]:hover,
+circle[data-brush="10"]:hover,
+circle[data-brush="20"]:hover,
+circle[data-brush="40"]:hover,
+circle[data-brush="60"]:hover,
+circle[data-brush="100"]:hover {
+	fill:#097d4b;
+	opacity:.6;
+}
+
+
+.canvas-background{
+	background-color:#2c2f35;
+}
+
+#canvas-div {
+	
+	margin:0px auto;
+	height:calc(100vh - 100px);
+	background-color:white;
+}
 
 #canvas-div canvas {
 	position: absolute;
+}
+
+header{
+	background-color: #e3e3e3;
+	border-bottom: solid 1px #c5c4c2;
+	height:100px;
+}
+
+.save-page-button{
+	font-size:70px !important;
+	color:black;
+	opacity:.4;
+	cursor:pointer;
+	vertical-align: top;
+	position:relative;
+	top:15px;
+	padding-left:15px;
+}
+
+.save-page-button:hover{
+	opacity:1;
 }
