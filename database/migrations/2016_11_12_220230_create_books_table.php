@@ -20,6 +20,7 @@ class CreateBooksTable extends Migration
 
 			# The rest of the fields...
 			$table->string('name');
+			$table->boolean('is_public')->default(false);
 
 			$table->integer('user_id')->unsigned();
 			$table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');;

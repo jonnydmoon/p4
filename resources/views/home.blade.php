@@ -1,11 +1,14 @@
 @extends('layouts.master')
 
+
+
+@section('title', 'Your Coloring Books')
+
 @section('content')
-	@foreach($books as $book)
-		<a class="book" href="{{ URL::route('public-book', $book->id) }}">
-			{{ $book->name }}
-		</a>
-	@endforeach
-@stop
+	
+	@each('partials.book', isset($books) ? $books : [], 'book', 'partials.empty-books')
+
+	<span onclick="app.showEditBook()">Add Coloring Book</span>
 
 
+@endsection

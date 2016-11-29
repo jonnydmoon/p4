@@ -1,5 +1,14 @@
 @extends('layouts.master')
 
+@section('toolset_links')
+	<div>
+		<a class="book" href="{{ URL::route('books.show', $page->book->id) }}">
+			{{ $page->book->name }}
+		</a>
+	</div>
+@stop
+
+
 @section('toolset')
 	<div id="toolset">
 		<div id='paints'></div>
@@ -29,7 +38,9 @@
 			<circle data-brush="5"   cx="50" cy="50" r="2.5" />
 		</svg>
 
-		<i class="fa fa-floppy-o save-page-button" aria-hidden="true"></i>
+		@if (!Auth::guest())
+			<i class="fa fa-floppy-o save-page-button" aria-hidden="true"></i>
+		@endif
 
 	</div>
 @stop
@@ -45,6 +56,7 @@
 	 
     <script type="text/javascript">
     	drawingApp.init('canvas-div', 900, 800, "{{ URL::asset('images/') }}", "{{ URL::asset('images/pages/' . $page->outline_url) }}", "{{ $page->colored_url ? URL::asset('images/colored-pages/' . $page->colored_url) : '' }}");
+    	$('body').addClass('coloring-page');
 	</script>
 
 

@@ -10,11 +10,11 @@ use App\Page;
 
 class GeneralController extends Controller
 {
-	public function home()
+	public function root()
 	{
 		$books = Book::where('user_id', '=', 1)->get();
 
-		return view('home')->with(['books' => $books]);
+		return view('root')->with(['books' => $books]);
 	}
 
 	public function publicBook($book_id)
@@ -23,14 +23,6 @@ class GeneralController extends Controller
 		$pages = Page::where('user_id', '=', 1)->where('book_id', '=', $book_id)->get();
 
 		return view('book')->with(['pages' => $pages, 'book'=> $book]);
-	}
-
-	public function page($page_id)
-	{
-		
-		$page = Page::where('user_id', '=', 1)->where('id', '=', $page_id)->first();
-
-		return view('page')->with(['page' => $page ]);
 	}
 
 	public function save(Request $request)

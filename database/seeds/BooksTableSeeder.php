@@ -16,6 +16,7 @@ class BooksTableSeeder extends Seeder
 			'created_at' => Carbon\Carbon::now()->toDateTimeString(),
 			'updated_at' => Carbon\Carbon::now()->toDateTimeString(),
 			'user_id' => 1,
+			'is_public' => 1,
 		]);
 
 		DB::table('books')->insert([
@@ -23,6 +24,7 @@ class BooksTableSeeder extends Seeder
 			'created_at' => Carbon\Carbon::now()->toDateTimeString(),
 			'updated_at' => Carbon\Carbon::now()->toDateTimeString(),
 			'user_id' => 1,
+			'is_public' => 1,
 		]);
 
 		DB::table('books')->insert([
@@ -30,6 +32,7 @@ class BooksTableSeeder extends Seeder
 			'created_at' => Carbon\Carbon::now()->toDateTimeString(),
 			'updated_at' => Carbon\Carbon::now()->toDateTimeString(),
 			'user_id' => 1,
+			'is_public' => 1,
 		]);
 
 		DB::table('books')->insert([
@@ -37,6 +40,7 @@ class BooksTableSeeder extends Seeder
 			'created_at' => Carbon\Carbon::now()->toDateTimeString(),
 			'updated_at' => Carbon\Carbon::now()->toDateTimeString(),
 			'user_id' => 1,
+			'is_public' => 1,
 		]);
 
 		DB::table('books')->insert([
@@ -44,6 +48,7 @@ class BooksTableSeeder extends Seeder
 			'created_at' => Carbon\Carbon::now()->toDateTimeString(),
 			'updated_at' => Carbon\Carbon::now()->toDateTimeString(),
 			'user_id' => 1,
+			'is_public' => 1,
 		]);
 
 

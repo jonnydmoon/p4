@@ -21,9 +21,9 @@ class CreatePagesTable extends Migration
             # The rest of the fields...
             $table->string('name');
             $table->string('outline_url');
-            $table->string('colored_url');
+            $table->string('colored_url')->nullable();
 
-            $table->integer('book_id')->unsigned();
+            $table->integer('book_id')->unsigned()->nullable();
             $table->foreign('book_id')->references('id')->on('books');
 
             $table->integer('user_id')->unsigned();

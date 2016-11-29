@@ -16,7 +16,7 @@ class PagesTableSeeder extends Seeder
             'user_id' => 1,
             'book_id' => 1,
             'outline_url' => 'horse.png',
-            'colored_url' => 'horse-colored.png',
+            'colored_url' => '',
             'created_at' => Carbon\Carbon::now()->toDateTimeString(),
 			'updated_at' => Carbon\Carbon::now()->toDateTimeString(),
         ]);

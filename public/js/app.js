@@ -75,3 +75,144 @@ function save(name){
 	$('#hidden-img-field').val(drawingApp.save());
 	$('#color-form').get(0).submit();
 }
+
+
+
+
+
+function ajax(type, url, data){
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': Laravel.csrfToken
+		}
+	});
+
+
+	if(type === 'PUT' || type === 'DELETE'){
+		data = data || new FormData();
+		data.append('_method',type);
+		type = 'POST';
+	}
+
+
+	return $.ajax({
+		type: type,
+		url: app.baseUrl + url,
+		data: data,
+		dataType: 'json',
+		cache: false,
+		processData: false, // Don't process the files
+        contentType: false, // Set content type to 
+	}).then(function(data){
+		if(data.errors && !_.isEmpty(data.errors)){
+			app.flash(_.values(data.errors));
+			throw data;
+		}
+		return data;
+	}).catch(function(e){
+		console.error('Error from server:', e);
+		throw e;
+	});
+}
+
+
+
+app.templates = {};
+
+$('script[type="text/template"]').each(function(){
+	var $el = $(this);
+	app.templates[$el.data('name')] = _.template($el.html());
+});
+
+app.showFullscreenPopover = function(){
+	$('body').addClass('fullscreen-popover-active');
+}
+
+app.hideFullscreenPopover = function(){
+	$('body').removeClass('fullscreen-popover-active');
+}
+
+app.showTemplate = function(templateId, data){
+	app.showFullscreenPopover();
+	$('.fullscreen-popover').html(app.templates[templateId]({data:data}));
+}
+
+app.redirectTo = function(path){
+	document.location = app.baseUrl + path;
+}
+
+app.flash = function(messages){
+	messages = _.isArray(messages) ? messages : [messages];
+	$('#messageArea').html(messages.map(function(message){ return app.templates.flashMessage({data:{message: message}}); }));
+}
+
+app.createPage = function(){
+	ajax('POST', '/pages', {
+		name: 'hey'
+	}).then(function(data){
+
+		console.log('MY RESULT ',data);
+	});
+}
+
+
+app.showEditPage = function(){
+	app.showTemplate('pageForm', {
+		pageTitle: 'Add A Coloring Page',
+		name: ''
+	});
+};
+
+app.editPage = function(){
+	var files = $('#file-input').get(0).files;
+	var data = new FormData();
+    $.each(files, function(key, value)
+    {
+        data.append('photo', value, value.name);
+    });
+
+
+    if(app.currentBook){
+		data.append('book_id', app.currentBook.id);
+	}
+
+    data.append('name', $('input[name="name"]').val());
+
+   	ajax('POST', '/pages', data).then(function(data){
+		document.location.reload();
+	});
+}
+
+app.showEditBook = function(useCurrentBook){
+
+	var name = '';
+	var id = null;
+
+	if(useCurrentBook){
+		name = app.currentBook.name;
+		id = app.currentBook.id;
+	}
+
+	app.showTemplate('bookForm', {
+		pageTitle: useCurrentBook ? 'Edit Coloring Book' : 'Add A Coloring Book',
+		name: name,
+		id: id
+	});
+};
+
+app.editBook = function(id){
+
+	var data = new FormData();
+    data.append('name', $('input[name="name"]').val());
+
+   	ajax(id ? 'PUT' : 'POST', '/books' + (id ? '/'+ id : '' ), data).then( function(data){
+		app.redirectTo('/books/' + data.book.id);
+	});
+}
+
+app.deleteBook = function(id){
+	if(!confirm('Are you sure you want to delete this book?')){ return; }
+   	ajax('DELETE', '/books/' + id).then( function(data){
+		app.redirectTo('/books');
+	});
+}

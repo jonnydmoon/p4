@@ -3,10 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Book;
+use App\Page;
+use App\CustomValidator;
+use Session;
+
 
 class BookController extends Controller
 {
@@ -17,18 +22,9 @@ class BookController extends Controller
      */
     public function index()
     {
-        $books = Book::all();
-        return view('book.index')->with(['title' => 'Books', 'books' => $books]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $books = Book::where('user_id', '=', 1)->get();
+        $my_books = Book::where('user_id', '=', Auth::id())->get();
+        return view('books.index')->with(['books' => $books, 'my_books' => $my_books]);
     }
 
     /**
@@ -39,8 +35,32 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $output = $this->validateStore($request->all());
+
+        if(count($output['errors'])){
+            return response()->json($output);
+        }
+
+        $book = new Book();
+        $book->name = $output['name'];
+        $book->user_id = Auth::id();
+        $book->save();
+        return response()->json(['book'=>$book]);
     }
+
+    private function validateStore($input){
+        $defaults = [
+            'name' => ''
+        ];
+
+        $input = array_merge($defaults, $input);
+        $output = []; // Output are variables that will be available to the html page.
+        $output['errors'] = [];
+        CustomValidator::validateField($input, $output, $defaults, 'name', 'required|string|max:255', 'Invalid value for name.');        
+        return $output;
+    }
+
+
 
     /**
      * Display the specified resource.
@@ -48,20 +68,18 @@ class BookController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($book_id)
     {
-        //
-    }
+       
+        $book = $this->getAuthenticatedBook($book_id, true);
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        if(is_null($book)) {
+            Session::flash('flash_message','Book not found');
+            return redirect('/books');
+        }
+
+        $pages = Page::where('book_id', '=', $book_id)->get();
+        return view('books.show')->with(['pages' => $pages, 'book'=> $book]);
     }
 
     /**
@@ -73,7 +91,21 @@ class BookController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $output = $this->validateStore($request->all());
+
+        if(count($output['errors'])){
+            return response()->json($output);
+        }
+
+        $book = $this->getAuthenticatedBook($id);
+
+        if(is_null($book)) {
+            return response()->json(['errors'=> ['You do not have permission to update this book.'] ]);
+        }
+
+        $book->name = $output['name'];
+        $book->save();
+        return response()->json(['book'=>$book]);
     }
 
     /**
@@ -84,6 +116,23 @@ class BookController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $book = $this->getAuthenticatedBook($id);
+
+        if(is_null($book)) {
+            return response()->json(['errors'=> ['You do not have permission to delete this book.'] ]);
+        }
+
+        $book->delete();
+        return response()->json(['result'=> true ]);
     }
+
+
+    private function getAuthenticatedBook($book_id, $allowPublicBooks = false){
+        $book = Book::find($book_id);
+        if( ($allowPublicBooks && $book->is_public) || ($book->user_id === Auth::id())){
+            return $book;
+        }
+        return null;
+    }
+
 }
