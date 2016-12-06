@@ -18,6 +18,10 @@
 		</span>
 
        
+		<h1 class="my-books">My Extra Coloring Pages</h1>
+        @each('partials.page', $my_pages, 'page')
+
+
     @endif
 
 

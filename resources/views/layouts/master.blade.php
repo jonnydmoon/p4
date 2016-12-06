@@ -48,7 +48,7 @@
 			@if (Auth::guest() && !Request::is('login*'))
                 <a href="{{ url('/login') }}">Login</a>
             @elseif(!Auth::guest())
-                Welcome, {{ Auth::user()->name }}! 
+                Welcome, <a href="{{ url('/my-account') }}">{{ Auth::user()->name }}</a>! 
 
                 <a class="logout-link" href="{{ url('/logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     Logout &raquo;
@@ -150,6 +150,20 @@
 		<button class="btn" onclick="app.hideFullscreenPopover()">Cancel</button>
 		<button type="submit" name="userSubmitted" class="btn btn-success" onclick="app.editBook(<%- data.id %>)">Submit</button>
 	</script>
+
+
+	<script type="text/template" data-name="saveColoringForm">
+		<h1><%- data.pageTitle %></h1>
+
+		<label>
+			<span>Name:</span> <input name="name" type="text" value="<%- data.name %>" />
+		</label>
+		<br /><br />
+
+		<button class="btn" onclick="app.hideFullscreenPopover()">Cancel</button>
+		<button type="submit" name="userSubmitted" class="btn btn-success" onclick="app.saveColoredPage()">Submit</button>
+	</script>
+
 
 
 	<script type="text/template" data-name="flashMessage">

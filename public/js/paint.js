@@ -347,29 +347,35 @@ var drawingApp = (function () {
 
 	return {
 		init: init,
-		setTool(tool){
+		setTool: function(tool){
 			curTool = tool;
 		},
-		setColor(color){
+		setColor: function(color){
 			color = hexToRgb(color);
 			curColor = color;
 		},
-		setSize(size){
+		setSize: function(size){
 			curSize = size;
 		},
-		reset(){
+		reset: function(){
 			clearContext(contexts.drawing);
 		},
-		changeImage(){
+		changeImage: function(){
 			clearContext(contexts.drawing);
 			outlineImage.src = "images/pear.png";
 			
 		},
-		swapColors(){
+		swapColors: function(){
 			
 		},
-		save(){
+		save: function(){
 			return $('canvas#drawing').get(0).toDataURL();
+		},
+		saveThumb: function(){
+			return merge2( $('canvas#outline,canvas#drawing') ).toDataURL();
+		},
+		saveOutline: function(){
+			return $('canvas#outline').get(0).toDataURL();
 		}
 	};
 

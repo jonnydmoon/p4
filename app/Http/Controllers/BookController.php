@@ -11,6 +11,7 @@ use App\Book;
 use App\Page;
 use App\CustomValidator;
 use Session;
+use DB;
 
 
 class BookController extends Controller
@@ -24,7 +25,28 @@ class BookController extends Controller
     {
         $books = Book::where('user_id', '=', 1)->get();
         $my_books = Book::where('user_id', '=', Auth::id())->get();
-        return view('books.index')->with(['books' => $books, 'my_books' => $my_books]);
+
+        $book_ids = $books->pluck('id');
+        $my_books_ids = $my_books->pluck('id');
+
+        $pages =  DB::select('SELECT * FROM pages where book_id in (?)', $book_ids->toArray() + $my_books_ids->toArray() );
+        $pages = collect($pages)->keyBy('book_id')->toArray();
+
+        foreach($books as $book){
+            if(array_key_exists($book->id, $pages)){
+                $book->cover = $pages[$book->id];
+            }
+        }
+
+        foreach($my_books as $book){
+            if(array_key_exists($book->id, $pages)){
+                $book->cover = $pages[$book->id];
+            }
+        }
+
+        $my_pages = Page::where('user_id', '=', Auth::id())->whereNull('book_id')->get();
+
+        return view('books.index')->with(['books' => $books, 'my_books' => $my_books, 'my_pages' => $my_pages]);
     }
 
     /**

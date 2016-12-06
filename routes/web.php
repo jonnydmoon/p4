@@ -5,7 +5,12 @@
 
 Auth::routes();
 
-Route::post("/page", "GeneralController@save")->name("save");
+Route::get("/my-account", "GeneralController@myAccount")->name("my-account");
+Route::post("/my-account", "GeneralController@saveMyAccount");
+
+
+Route::post("/coloring-page", "PageController@saveColoringPage")->name("save");
+Route::post("/move-coloring-page", "PageController@moveColoringPage")->name("move-coloring-page");
 
 
 Route::get("/", "BookController@index")->name("root");

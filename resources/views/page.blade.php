@@ -2,9 +2,7 @@
 
 @section('toolset_links')
 	<div>
-		<a class="book" href="{{ URL::route('books.show', $page->book->id) }}">
-			{{ $page->book->name }}
-		</a>
+		<?php if($page->book):?><a href="{{ URL::route('books.show', $page->book->id) }}">{{ $page->book->name }}</a> > <?php endif; ?> {{ $page->name }}
 	</div>
 @stop
 
@@ -29,19 +27,25 @@
 			</svg>
 		</div>
 
-		<svg viewBox="0 0 100 100" class="brush-size">
-			<circle data-brush="100" cx="50" cy="50" r="50"  />
-			<circle data-brush="60"  cx="50" cy="50" r="30"  />
-			<circle data-brush="40"  cx="50" cy="50" r="20"  />
-			<circle data-brush="20"  cx="50" cy="50" r="10"  />
-			<circle data-brush="10"  cx="50" cy="50" r="5"   />
-			<circle data-brush="5"   cx="50" cy="50" r="2.5" />
-		</svg>
+		<div class="brush-size-container">
+
+			<svg viewBox="0 0 100 100" class="brush-size">
+				<circle data-brush="100" cx="50" cy="50" r="50"  />
+				<circle data-brush="60"  cx="50" cy="50" r="30"  />
+				<circle data-brush="40"  cx="50" cy="50" r="20"  />
+				<circle data-brush="20"  cx="50" cy="50" r="10"  />
+				<circle data-brush="10"  cx="50" cy="50" r="5"   />
+				<circle data-brush="5"   cx="50" cy="50" r="2.5" />
+			</svg>
+
+		</div>
 
 		@if (!Auth::guest())
 			<i class="fa fa-floppy-o save-page-button" aria-hidden="true"></i>
 		@endif
-
+		<script>
+			app.currentPage = <?php echo json_encode($page); ?>;
+  		</script>
 	</div>
 @stop
 
@@ -55,18 +59,9 @@
 
 	 
     <script type="text/javascript">
-    	drawingApp.init('canvas-div', 900, 800, "{{ URL::asset('images/') }}", "{{ URL::asset('images/pages/' . $page->outline_url) }}", "{{ $page->colored_url ? URL::asset('images/colored-pages/' . $page->colored_url) : '' }}");
+    	drawingApp.init('canvas-div', 900, 800, "{{ URL::asset('images/') }}", "{{ URL::asset('images/pages/' . $page->outline_url) }}", "{{ $page->colored_url ? URL::asset('images/pages/' . $page->colored_url) : '' }}");
     	$('body').addClass('coloring-page');
 	</script>
-
-
-
-	<form method="POST" action="{{ URL::asset('page') }}" enctype="multipart/form-data" id="color-form">
-		{{ csrf_field() }}
-		<input type="hidden" name="img" id="hidden-img-field">
-		<input type="hidden" name="name" id="hidden-name-field">
-
-	</form>
 
 
 @stop

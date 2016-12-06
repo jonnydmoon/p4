@@ -58,6 +58,21 @@ body {
 	color: #545454;
 }
 
+
+@media print {
+	header{
+		display:none;
+	}
+	canvas {
+	    height: 100%;
+	    width: auto;
+	}
+	#canvas-div{
+		width:100%;
+	}
+}
+
+
 #tools{
 	float:left;
 	display:flex;
@@ -82,12 +97,18 @@ body {
 	opacity:1;
 }
 
+.dragging .book.drag-hover{
+	outline: dashed 3px #1d74d2 !important;
+}
+
 .book, .page{
+	position:relative;
 	float: left;
 	border: solid 1px #dedede;
 	margin: 25px 0px 0px 25px;
 	width: 200px;
 	height: 260px;
+
 
 	opacity: .8;
     transition: opacity .5s, box-shadow .5s;
@@ -103,10 +124,10 @@ body {
 
 
     padding:10px;
-    cursor:pointer;
+    XXXcursor:pointer;
     border-left: solid 15px #095634;
     border-bottom: solid 5px #a0a0a0;
-    background:url('../images/page-corner.png') bottom right no-repeat;
+    background:url('../images/page-corner.png') white bottom right no-repeat;
 }
 
 .book:hover, .page:hover {
@@ -117,13 +138,22 @@ body {
 }
 
 .page{
-	background:none;
+	background:white;
 	border: solid 1px #dedede;
+	
 }
 
-.page img{
+.page img, .book img{
 	margin-top:33px;
 }
+
+.page img, .book img{
+	width:100%;
+	position:absolute;
+	top:33px;
+	left:0px;
+}
+
 
 .coloring-page{
 	width:100%;
@@ -150,6 +180,7 @@ body {
 
 .brush-size{
 	height:100px;
+	width:100px;
 }
 
 [data-brush="5"]   circle[data-brush="5"],
@@ -254,6 +285,10 @@ header{
 	margin:20px;
 }
 
+.main-content{
+	clear:both;
+}
+
 .coloring-page .main-content{
 	margin:0px;
     min-height: calc(100vh - 100px);
@@ -293,4 +328,28 @@ button.btn{
 
 .add-page .fa{
 	padding-left:69px;
+}
+
+.update-password-label{
+	padding-left:106px;
+}
+
+.update-password{
+	margin-left: 26px !important;
+}
+
+.update-password + div{
+	display:none;
+}
+
+.update-password:checked + div{
+	display:block;
+}
+
+.dragging {
+	XXXcursor:pointer !important;
+}
+
+.brush-size-container{
+	float:left;
 }

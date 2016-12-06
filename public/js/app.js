@@ -66,17 +66,16 @@ $('.brush-size').on('click', function(e){
 })
 
 $('.save-page-button').on('click', function(e){
-	var name = prompt("Please give this page a name", 'My Coloring Page');
-	save(name);
+	
+	var currentPage = app.currentPage || {};
+
+	app.showTemplate('saveColoringForm', {
+		pageTitle: 'Save',
+		name: currentPage.name,
+		id: currentPage.id,
+		isOwnPage: currentPage.user_id === app.user_id
+	});
 })
-
-function save(name){
-	$('#hidden-name-field').val(name);
-	$('#hidden-img-field').val(drawingApp.save());
-	$('#color-form').get(0).submit();
-}
-
-
 
 
 
@@ -210,9 +209,65 @@ app.editBook = function(id){
 	});
 }
 
+app.saveColoredPage = function(id){
+
+	var data = new FormData();
+    data.append('name', $('input[name="name"]').val());
+    data.append('img', drawingApp.save());
+    data.append('thumb', drawingApp.saveThumb());
+    data.append('outline', drawingApp.saveOutline());
+    data.append('id', app.currentPage.id);
+
+   	ajax('POST', '/coloring-page', data).then(function(data){
+		document.location.reload();
+	});
+}
+
 app.deleteBook = function(id){
 	if(!confirm('Are you sure you want to delete this book?')){ return; }
    	ajax('DELETE', '/books/' + id).then( function(data){
 		app.redirectTo('/books');
 	});
 }
+
+app.onPageDragStart = function(event, id){
+	app.currentlyDraggedPage = event.currentTarget;
+	var crt = event.currentTarget.cloneNode(true);
+    crt.style.position = "absolute"; crt.style.top = "-50px"; crt.style.right = "0px";
+    document.body.appendChild(crt);
+    event.dataTransfer.setDragImage(crt, 100, 100);
+	event.dataTransfer.setData("text", id);
+}
+
+app.onDropBook = function(event, id){
+	event.preventDefault();
+    var pageId = event.dataTransfer.getData("text");
+
+    var data = new FormData();
+    data.append('book_id', id);
+    data.append('id', pageId);
+
+    ajax('POST', '/move-coloring-page', data).then(function(data){
+		if(data.result){
+			$(app.currentlyDraggedPage).remove();
+		}
+	});
+
+}
+
+app.onDragOverBook = function(event, id){
+	event.preventDefault();
+}
+
+app.onDragEnterBook = function(event, id){
+	event.preventDefault();
+	$(event.currentTarget).toggleClass('drag-hover', true);
+}
+
+app.onDragLeaveBook = function(event, id){
+	event.preventDefault();
+	$(event.currentTarget).toggleClass('drag-hover', false);
+}
+
+document.ondragstart = function(){$('body').toggleClass('dragging', true);}
+document.ondragend = function(){$('body').toggleClass('dragging', false);  $('.drag-hover').removeClass('drag-hover')}

@@ -9,11 +9,7 @@
 @endif
 
 @section('content')
-	@foreach($pages as $page)
-		<a class="page" href="{{ URL::route('pages.show', $page->id) }}">{{ $page->name }}
-			<img style="width:100%;" src="{{ URL::asset('images/pages/' . $page->outline_url) }}" />
-		</a>
-	@endforeach
+	@each('partials.page', $pages, 'page')
 
 	@if(!Auth::guest())
 	<span class="page add-page" onclick="app.showEditPage()">
