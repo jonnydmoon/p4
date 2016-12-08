@@ -29,8 +29,18 @@ class BookController extends Controller
         $book_ids = $books->pluck('id');
         $my_books_ids = $my_books->pluck('id');
 
-        $pages =  DB::select('SELECT * FROM pages where book_id in (?)', $book_ids->toArray() + $my_books_ids->toArray() );
+        $ids = $book_ids->toArray() + $my_books_ids->toArray();
+        $place_holders = implode(',', array_fill(0, count($ids), '?'));
+
+
+        $pages =  DB::select('SELECT * FROM pages where book_id in (' .  $place_holders . ')', $ids );
+
+       // dd($book_ids->toArray() + $my_books_ids->toArray());
+
+
         $pages = collect($pages)->keyBy('book_id')->toArray();
+
+
 
         foreach($books as $book){
             if(array_key_exists($book->id, $pages)){
