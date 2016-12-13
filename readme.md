@@ -1,53 +1,59 @@
-# Project 4: Developer's Best Friend
+# Project 4: Coloring Pages
 
 ## Live URL
-<http://p3.jonnymoon.com>
+<http://p4.jonnymoon.com>
 
 ## Description
-This website provides a few tools to help in web development. 
-* Lorem Ipsum - Generate lorem ipsum text blocks.
-* Password Generator - Create a memorable password that needs to match certain rules.
-* User Generator - Generate user content for UI mock ups.
-* Image Generator - Resize images and adjust quality.
+This website allows for users to color coloring pages online. The main focus is to 
+provide a place where children can easily navigate and color pages. There are some
+tasks that would most likely be performed by the child's parent, such as uploading new
+pages to color.
 
 ## Demo
-<https://youtu.be/CoPVCPMQxHs>
+<https://youtu.be/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX>
 
 ## Details for teaching team
-The website is responsive. I converted/included the password generator from project 2.
-I also created an image generator that can resize an uploaded image. As part of the 
-image generator, I created a cache that clears out expired images so that images remain
-on the server only for a short time.
+I found a tutorial about how to use html canvas at <http://www.williammalone.com/articles/create-html5-canvas-javascript-drawing-app/>
+I used this code as the basis for the drawing portion of the site, but ended up significantly rewriting most of it to work for 
+my application. Some notable changes include:
+* A completely different UI.
+* The ability to export pictures to save them to a server.
+* The paint bucket tool was enhanced to support intersecting colors from the base layer and the color layer.
+* The paint bucket tool was enhanced to support dragging.
+* The eraser tool was updated to actually erase instead of drawing a white stroke.
+* Added the ability to dynamically load an image and convert the light colors to transparent.
+* Allowed the canvas to scale to the largest possible size availble for the given window size.
+* Much of the code was refactored to be more modular and reusable.
+* Double clicking the eraser clears all the colored layer.
+* Erasing while pressing Control key will erase the base outline layer.
 
-I created a custom validator that I use for all of the controllers to validate the data.
-If there is invalid data, it is usually auto-corrected to the default value and processed normally.
+Once logged in, a user has the ability to click on their name to edit his/her email or password.
 
-As part of the user generator, I added the ability to export the data in JSON format. This is 
-useful for using the user content in a variety of programming languages.
+In order to upload, edit, create, ands save pages and books, a user must be logged in.
 
-I also added a JSON Formatter tool. It has a couple of display modes. It allows the user to display 
-the JSON using "fullscreen" without the website header and footer. The editor uses the Ace editor.
-I chose to use the Ace editor because I like how it can highlight the JSON and give visual indications 
-of errors.
+Whenever a coloring page is saved, I actually save 2 portions. One layer is the base layer with the black outlines.
+The other layer is the colored layer. This allows a user to come back to a drawing later on and modify the coloring
+without the black outlines being erased.
+
+When a coloring page is saved, if it does not have a book, it will be placed in the "My Extra Pages" section on the home page.
+A user can drag and drop these pages to their own coloring books.
+
+Most of the forms use ajax for submission.
+
+## CRUD Operations
+You must be logged in to perform the CRUD operations, which include all operations for both Coloring Books and Pages:
+* Create - On the home page a user can "Add a Coloring Book". Once inside a book, a user can "Add a page". In addition, when users save a coloring page, they can chose "Save As" which also creates a new page. 
+* Read - On the home page all the books are displayed. Click a book to view the pages for that book.
+* Update - When viewing a coloring book that you own, a gear icon will be next to the title of the book in the header. Clicking this allows a user to edit the book name. For coloring pages, if a user is the owner, they can click the save icon at the top of the page after coloring the page. This allow a user to also modify the name. Updates are also performed when a user drags pages around to books.
+* Delete - There is delete icon that is next to the book/page title in the edit screens displayed in the previous bullet point. This deletes the book/page.
+
+## Planning Doc: 
+<https://docs.google.com/document/d/1ug1JlBP5GDxUHdlynbw9jHRmLjOwX79nr4yGDpMla3Y/edit?usp=sharing>
 
 ## Outside Code, Resources, and Packages
 * Bootstrap: http://getbootstrap.com/
 * Google Fonts: https://fonts.google.com/
 * Font Awesome: http://fontawesome.io/
-* Password Word List: http://www.wordfrequency.info/
-* Lorem Ipsum Text: http://www.lipsum.com/
-* First and Last Names: http://names.mongabay.com
-* City, State, Zipcode: http://federalgovernmentzipcodes.us/
-* Addresses: https://www.randomlists.com/random-addresses
-* User Content Profile Images: http://uifaces.com
-* JSON Editor: https://ace.c9.io
 * Intervention Image: http://image.intervention.io/
-* Webmozart JSON: https://github.com/webmozart/json
-
-
-
-
-Planning Doc: https://docs.google.com/document/d/1ug1JlBP5GDxUHdlynbw9jHRmLjOwX79nr4yGDpMla3Y/edit?usp=sharing
-
-
-https://openclipart.org/detail/187781/christmas-tree-coloring-page
+* Laravel Debugbar: https://github.com/barryvdh/laravel-debugbar
+* Coloring Pages: https://openclipart.org

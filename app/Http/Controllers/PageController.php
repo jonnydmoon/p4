@@ -126,30 +126,58 @@ class PageController extends Controller
 		}
 
 
-		$filename = $this->saveUploadedBase64Image($_POST['img']);
-		$thumbFilename = $this->saveUploadedBase64Image($_POST['thumb']);
-		$this->saveThumb(self::IMAGE_DIR . $thumbFilename, $filename);
-		unlink(self::IMAGE_DIR . $thumbFilename);
-		
+		if(!$output['saveOutline']){
+			$filename = $this->saveUploadedBase64Image($_POST['img']);
+			$thumbFilename = $this->saveUploadedBase64Image($_POST['thumb']);
+			$this->saveThumb(self::IMAGE_DIR . $thumbFilename, $filename);
+			unlink(self::IMAGE_DIR . $thumbFilename);
+		}	
 
-		if($originalPage->user_id === Auth::id()){
+
+		if($originalPage->user_id === Auth::id() && $output['saveAs'] != 1){
 			$page = $originalPage;
+			$page->name = $output['name'];
+			
+
+			if($page->colored_url){
+				if(file_exists(self::IMAGE_DIR . $page->colored_url)) { unlink(self::IMAGE_DIR . $page->colored_url); }
+				if(file_exists(self::THUMB_DIR . $page->colored_url)) { unlink(self::THUMB_DIR . $page->colored_url); }
+			}
+
+			if($output['saveOutline'] ){
+				if($page->outline_url){
+					if(file_exists(self::IMAGE_DIR . $page->outline_url)) { unlink(self::IMAGE_DIR . $page->outline_url); }
+					if(file_exists(self::THUMB_DIR . $page->outline_url)) { unlink(self::THUMB_DIR . $page->outline_url); }
+				}
+				$outlineFilename = $this->saveUploadedBase64Image($_POST['outline'], $page->outline_url); // Save using the same outline url.
+				$this->saveThumb(self::IMAGE_DIR . $outlineFilename, $outlineFilename);
+			}
+
 		}else{
+			// SAVE AS: CREATE A NEW PAGE
 			$page = new Page();
+			$page->name = $output['name'];
+			$page->book_id = $output['book_id'];
+			$page->user_id = Auth::id();
+			$page->outline_url = $originalPage->outline_url;
+
+			if($output['saveOutline'] ){
+				$outlineFilename = $this->saveUploadedBase64Image($_POST['outline']); // Save using the same outline url.
+				$this->saveThumb(self::IMAGE_DIR . $outlineFilename, $outlineFilename);
+				$page->outline_url = $outlineFilename;
+			}
+
 		}
-		
-		$page->name = $output['name'];
-		$page->book_id = $output['book_id'];
-		$page->user_id = Auth::id();
-		$page->outline_url = $originalPage->outline_url;
-		$page->colored_url = $filename;
+
+
+		$page->colored_url = $output['saveOutline'] ? null : $filename;
 		$page->save();
 
-		return response()->json(['result'=>true]);
+		return response()->json(['result'=>true, 'id'=>$page->id ]);
 	}
 
-	private function saveUploadedBase64Image($img){
-		$filename = uniqid() . '.png';
+	private function saveUploadedBase64Image($img, $filename = ''){
+		$filename = $filename ? $filename : uniqid() . '.png';
 		$img = str_replace('data:image/png;base64,', '', $img);
 		$img = str_replace(' ', '+', $img);
 		$data = base64_decode($img);
@@ -176,18 +204,22 @@ class PageController extends Controller
 			'img' => '',
 			'thumb' => '',
 			'outline' => '',
+			'saveAs' => 1,
+			'saveOutline' => 0,
 		];
 
 		$input = array_merge($defaults, $input);
 
 		$output = []; // Output are variables that will be available to the html page.
-		$output['errors'] = [];
+		$output['errors'] = [];      
 		CustomValidator::validateField($input, $output, $defaults, 'name', 'required|string', 'Invalid value for "Name".');        
 		CustomValidator::validateField($input, $output, $defaults, 'id', 'required|numeric', null, true);        
 		CustomValidator::validateField($input, $output, $defaults, 'book_id', 'numeric|nullable');        
 		CustomValidator::validateField($input, $output, $defaults, 'img', "string|required", 'You must submit a file and it must be less than 10mb and be .jpg or .png');
 		CustomValidator::validateField($input, $output, $defaults, 'thumb', "string|required", 'You must submit a file and it must be less than 10mb and be .jpg or .png');
 		CustomValidator::validateField($input, $output, $defaults, 'outline', "string|required", 'You must submit a file and it must be less than 10mb and be .jpg or .png');
+		CustomValidator::validateField($input, $output, $defaults, 'saveAs', 'required|numeric', 'Invalid value for "Save As".', true);  
+		CustomValidator::validateField($input, $output, $defaults, 'saveOutline', 'required|numeric', 'Invalid value for "Save Outline".', true);  
 
 
 		return $output;
@@ -285,7 +317,14 @@ class PageController extends Controller
 	 */
 	public function destroy($id)
 	{
-		//
+		$page = $this->getAuthenticatedPage($id);
+
+        if(is_null($page)) {
+            return response()->json(['errors'=> ['You do not have permission to delete this page.'] ]);
+        }
+
+        $page->delete();
+        return response()->json(['result'=> true ]);
 	}
 
 

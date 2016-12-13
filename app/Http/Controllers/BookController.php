@@ -29,7 +29,8 @@ class BookController extends Controller
         $book_ids = $books->pluck('id');
         $my_books_ids = $my_books->pluck('id');
 
-        $ids = $book_ids->toArray() + $my_books_ids->toArray();
+        $ids = array_merge($book_ids->toArray(), $my_books_ids->toArray());
+
         $place_holders = implode(',', array_fill(0, count($ids), '?'));
 
 
@@ -110,7 +111,7 @@ class BookController extends Controller
             return redirect('/books');
         }
 
-        $pages = Page::where('book_id', '=', $book_id)->get();
+        $pages = Page::where('book_id', '=', $book_id)->orderBy('name')->get();
         return view('books.show')->with(['pages' => $pages, 'book'=> $book]);
     }
 

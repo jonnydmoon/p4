@@ -59,6 +59,15 @@ $('#tools').on('click', function(e){
 	render();
 });
 
+
+$('#tools').on('dblclick', function(e){
+	currentTool = $(e.target).closest('svg').attr('data-tool');
+	if(currentTool === 'eraser'){
+		drawingApp.reset();
+	}
+});
+
+
 $('.brush-size').on('click', function(e){
 	currentSize = $(e.target).closest('circle').attr('data-brush');
 	drawingApp.setSize(currentSize);
@@ -73,7 +82,7 @@ $('.save-page-button').on('click', function(e){
 		pageTitle: 'Save',
 		name: currentPage.name,
 		id: currentPage.id,
-		isOwnPage: currentPage.user_id === app.user_id
+		isOwner: currentPage.user_id === app.user_id
 	});
 })
 
@@ -94,6 +103,8 @@ function ajax(type, url, data){
 	}
 
 
+	app.loading(true);
+
 	return $.ajax({
 		type: type,
 		url: app.baseUrl + url,
@@ -107,9 +118,11 @@ function ajax(type, url, data){
 			app.flash(_.values(data.errors));
 			throw data;
 		}
+		app.loading(false);
 		return data;
 	}).catch(function(e){
 		console.error('Error from server:', e);
+		app.loading(false);
 		throw e;
 	});
 }
@@ -129,6 +142,10 @@ app.showFullscreenPopover = function(){
 
 app.hideFullscreenPopover = function(){
 	$('body').removeClass('fullscreen-popover-active');
+}
+
+app.loading = function(value){
+	$('body').toggleClass('loading', value);
 }
 
 app.showTemplate = function(templateId, data){
@@ -193,6 +210,7 @@ app.showEditBook = function(useCurrentBook){
 	}
 
 	app.showTemplate('bookForm', {
+		isNew: !useCurrentBook,
 		pageTitle: useCurrentBook ? 'Edit Coloring Book' : 'Add A Coloring Book',
 		name: name,
 		id: id
@@ -209,17 +227,31 @@ app.editBook = function(id){
 	});
 }
 
-app.saveColoredPage = function(id){
+app.saveColoredPage = function(doSaveAs){
 
 	var data = new FormData();
     data.append('name', $('input[name="name"]').val());
     data.append('img', drawingApp.save());
     data.append('thumb', drawingApp.saveThumb());
     data.append('outline', drawingApp.saveOutline());
+    data.append('book_id', app.currentPage.book_id);
     data.append('id', app.currentPage.id);
+    data.append('saveAs', doSaveAs ? 1 : 0);
+
+
+    var saveOutline = $('#update-black-lines').is(':checked');
+
+    if(saveOutline){
+    	data.append('saveOutline', saveOutline ? 1 : 0);
+    }
 
    	ajax('POST', '/coloring-page', data).then(function(data){
-		document.location.reload();
+		if(data.id == app.currentPage.id){
+			document.location.reload();
+		}
+		else{
+			app.redirectTo('/pages/' + data.id);
+		}
 	});
 }
 
@@ -227,6 +259,13 @@ app.deleteBook = function(id){
 	if(!confirm('Are you sure you want to delete this book?')){ return; }
    	ajax('DELETE', '/books/' + id).then( function(data){
 		app.redirectTo('/books');
+	});
+}
+
+app.deletePage = function(id){
+	if(!confirm('Are you sure you want to delete this page?')){ return; }
+   	ajax('DELETE', '/pages/' + id).then( function(data){
+		app.redirectTo('/books/' + app.currentPage.book_id);
 	});
 }
 

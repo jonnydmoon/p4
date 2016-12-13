@@ -34,12 +34,13 @@
 
 <body>
 	<header >
-			<div class="logo">
-				<a href="{{ URL::route('root') }}"><img src="{{ URL::asset('images/logo.png') }}" /></a></div>
+			<div class="header-left">
+				<div class="logo">
+					<a href="{{ URL::route('root') }}"><img src="{{ URL::asset('images/logo.png') }}" /></a>
+				</div>
+
+				@yield('toolset', '')
 			</div>
-
-			@yield('toolset', '')
-
 
 
 
@@ -69,17 +70,13 @@
 
 	</header>
 
-	
 	<div id='messageArea'>
 		@if(Session::get('flash_message') != null)
-	        <div class="alert alert-danger" data-dismiss="alert" role="alert">
+			<div class="alert alert-danger" data-dismiss="alert" role="alert">
 				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
 				<strong>Error</strong> {{ Session::get('flash_message') }}
 			</div>
-	    @endif
-		
-
-
+		@endif
 		@foreach ($errors as $error)
 			<div class="alert alert-danger" data-dismiss="alert" role="alert">
 				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
@@ -88,36 +85,30 @@
 		@endforeach
 	</div>
 
-
-	<main class="main-content ">
-		{{-- Global error section --}}
+	<div class="main">
 		
+		<main class="main-content ">
+			{{-- Global error section --}}
+			
 
-		@if($__env->yieldContent('title'))
-		<h1>
-			@yield('title')
-			@if($__env->yieldContent('settings'))
-				@yield('settings')
+			@if($__env->yieldContent('title'))
+			<h1>
+				@yield('title')
+				@if($__env->yieldContent('settings'))
+					@yield('settings')
+				@endif
+			</h1>
 			@endif
-		</h1>
-		@endif
 
-		{{-- Main page content --}}
-		@yield('content')
+			{{-- Main page content --}}
+			@yield('content')
+		</main>
 
-
-
-	</main>
-
-	<div class="fullscreen-popover">
-		
+		<div class="fullscreen-popover"></div>
 	</div>
 
 
-
-
-
-
+	<div class='loading-overlay'></div>
 
 	<script type="text/template" data-name="pageForm">
 		<h1><%- data.pageTitle %></h1>
@@ -139,7 +130,9 @@
 	<script type="text/template" data-name="bookForm">
 		<h1>
 			<%- data.pageTitle %>
-			<i class="fa fa-trash-o" aria-hidden="true" onclick="app.deleteBook(<%- data.id %>)"></i>
+			<% if(!data.isNew){ %>
+				<i class="delete-entity fa fa-trash-o" title="Delete Book" aria-hidden="true" onclick="app.deleteBook(<%- data.id %>)"></i>
+			<%}%>
 		</h1>
 
 		<label>
@@ -153,15 +146,30 @@
 
 
 	<script type="text/template" data-name="saveColoringForm">
-		<h1><%- data.pageTitle %></h1>
+		<h1>
+			<%- data.pageTitle %>
+			<% if(data.isOwner){ %>
+				<i class="delete-entity fa fa-trash-o" title="Delete Page" aria-hidden="true" onclick="app.deletePage(<%- data.id %>)"></i>
+			<%}%>		
+		</h1>
 
 		<label>
 			<span>Name:</span> <input name="name" type="text" value="<%- data.name %>" />
 		</label>
+
+		<h5>Advanced</h5>
+		<div class="advanced-section">
+			<input type="checkbox" id="update-black-lines" /> Update base area (your image should only be black and white).
+		</div>
+
+
 		<br /><br />
 
 		<button class="btn" onclick="app.hideFullscreenPopover()">Cancel</button>
-		<button type="submit" name="userSubmitted" class="btn btn-success" onclick="app.saveColoredPage()">Submit</button>
+		<% if(data.isOwner){ %>
+			<button type="submit" name="userSubmitted" class="btn btn-success" onclick="app.saveColoredPage()">Save</button>
+		<%}%>
+		<button type="submit" name="userSubmitted" class="btn btn-success" onclick="app.saveColoredPage(true)">Save As</button>
 	</script>
 
 

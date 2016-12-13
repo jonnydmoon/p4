@@ -5,7 +5,7 @@
 @section('content')
 
 	
-	@each('partials.book', $books, 'book', 'partials.emtpy-books')
+	@each('partials.book', $books, 'book')
 
 
 	@if (!Auth::guest())
@@ -18,9 +18,10 @@
 		</span>
 
        
-		<h1 class="my-books">My Extra Coloring Pages</h1>
-        @each('partials.page', $my_pages, 'page')
-
+		@if (count($my_pages))
+			<h1 class="my-books">My Extra Coloring Pages</h1>
+			@each('partials.page', $my_pages, 'page')
+   		@endif
 
     @endif
 

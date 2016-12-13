@@ -30,6 +30,9 @@ var drawingApp = (function () {
 		coloredImage = new Image(),
 		crayonTextureImage = new Image(),
 		paint = false,
+		mouseDown = false,
+		ctrlKey,
+		shiftKey,
 		curTool = "marker",
 		sizeLineStartY = 228,
 		resourcesLoadingCount = 0,
@@ -97,6 +100,10 @@ var drawingApp = (function () {
 		// Start painting with paint bucket tool starting from pixel specified by startX and startY
 		paintAt = function (startX, startY) {
 
+
+			colorLayerData = contexts.drawing.getImageData(0, 0, canvasWidth, canvasHeight);
+
+
 			var pixelPos = (startY * contexts.drawing.canvas.width + startX) * 4,
 				r = colorLayerData.data[pixelPos],
 				g = colorLayerData.data[pixelPos + 1],
@@ -123,6 +130,12 @@ var drawingApp = (function () {
 
 				var drag = function (e) {
 
+					if(curTool === 'bucket' && mouseDown == true){
+						paintAt(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+						redraw();
+					}
+
+
 					if (curTool !== "bucket") {
 						if (paint) {
 							addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
@@ -134,7 +147,7 @@ var drawingApp = (function () {
 				},
 
 				release = function () {
-
+					mouseDown = false;
 					if (curTool !== "bucket") {
 						paint = false;
 					}
@@ -150,12 +163,17 @@ var drawingApp = (function () {
 
 				pressDrawing = function (e) {
 
+					mouseDown = true;
+
 					// Mouse down location
 					var mouseX = (e.changedTouches ? e.changedTouches[0].pageX : e.pageX) - this.offsetLeft,
 						mouseY = (e.changedTouches ? e.changedTouches[0].pageY : e.pageY) - this.offsetTop;
 
 
-					console.log("Mouse", mouseX, mouseY);	
+					//console.log("Mouse", mouseX, mouseY);	
+
+					ctrlKey = e.ctrlKey;
+					shiftKey = e.shiftKey ? {x: e.pageX - this.offsetLeft, y:e.pageY - this.offsetTop} : false;
 
 
 					if (curTool === "bucket") {
@@ -174,6 +192,12 @@ var drawingApp = (function () {
 					var mouseX = (e.changedTouches ? e.changedTouches[0].pageX : e.pageX) - this.offsetLeft,
 						mouseY = (e.changedTouches ? e.changedTouches[0].pageY : e.pageY) - this.offsetTop;
 
+
+					if(curTool === 'bucket' && mouseDown == true){
+						paintAt(mouseX, mouseY);
+						redraw();
+					}
+
 					if (curTool !== "bucket") {
 						if (paint) {
 							addClick(mouseX, mouseY, true);
@@ -186,6 +210,7 @@ var drawingApp = (function () {
 				},
 
 				releaseDrawing = function () {
+					mouseDown = false;
 					currentClick = null;
 					if (curTool !== "bucket") {
 						paint = false;
@@ -236,7 +261,7 @@ var drawingApp = (function () {
 		init = function(id, width, height, baseAssetUrl, outlineUrl, colorUrl){
 			outlineImage.onload = function () {
 				outlineImage.onload = null;
-				console.log('LOADED', outlineImage.width, outlineImage.height);
+				//console.log('LOADED', outlineImage.width, outlineImage.height);
 
 				var outlineHeight = outlineImage.height;
 				var outlineWidth = outlineImage.width;
@@ -367,6 +392,18 @@ var drawingApp = (function () {
 		},
 		swapColors: function(){
 			
+			var canvas = merge2( $('canvas#outline,canvas#drawing') );
+			var mergedContext = canvas.getContext("2d");;
+			var mergedContextLayerData = mergedContext.getImageData(0, 0, canvasWidth, canvasHeight);
+			
+			
+			swapColors(contexts.outline, mergedContextLayerData);
+
+			//swapColors(mergedContext, mergedContextLayerData);
+			//swapColors(contexts.outline, mergedContextLayerData); 
+			// show it on the canvas
+			//$('#drawing').hide();
+
 		},
 		save: function(){
 			return $('canvas#drawing').get(0).toDataURL();
@@ -375,18 +412,100 @@ var drawingApp = (function () {
 			return merge2( $('canvas#outline,canvas#drawing') ).toDataURL();
 		},
 		saveOutline: function(){
-			return $('canvas#outline').get(0).toDataURL();
+
+			var mergedCanvas = merge2( $('canvas#outline,canvas#drawing') );
+			var mergedContext = mergedCanvas.getContext("2d");;
+			var mergedContextLayerData = mergedContext.getImageData(0, 0, canvasWidth, canvasHeight);
+			swapColors(mergedContext, mergedContextLayerData);
+
+			return mergedCanvas.toDataURL();
 		}
 	};
 
 
+	//If you save as outline, then dont save the color.
+
+	function swapColors(destinationContext, contextData){
+
+		var whiteColor = { r: 255, g: 255, b: 255, a:255 };
+		var blackColor = { r: 0, g: 0, b: 0, a:255 };
+		var transparentColor = { r: 0, g: 0, b: 0, a:0 };
+
+		function isWithinFuzziness(color, color2, fuzziness){
+			return color >= color2 - fuzziness && color <= color2 + fuzziness;
+		}
+
+		function isMatch(pixelR, pixelG, pixelB, pixelA, color, fuzziness){
+			return isWithinFuzziness(pixelR, color.r, fuzziness) &&
+				isWithinFuzziness(pixelG, color.g, fuzziness) &&
+				isWithinFuzziness(pixelB, color.b, fuzziness) &&
+				isWithinFuzziness(pixelA, color.a, fuzziness);
+		}
+
+		function setColor(pixel, r, newColor){
+			pixel[r] = newColor.r; // Make it transparent
+			pixel[r+1] = newColor.g; // Make it transparent
+			pixel[r+2] = newColor.b; // Make it transparent
+			pixel[r+3] = newColor.a; // Make it transparent
+		}
+
+
+		swap(destinationContext, contextData, function(pixel, r, g, b, a){ // need to remove colors that are not black, and not white.
+			var fuzziness = 150;
+
+			if(isMatch(pixel[r], pixel[g], pixel[b], pixel[a], blackColor, fuzziness)){ 
+//				setColor(pixel, r, blackColor); 
+			} // Set dark colors to black
+			else{  setColor(pixel, r, transparentColor); }
+
+			
+		}); 
+	}
+
+
+	function swap(destinationContext, contextData, pixelHandler){
+
+		pixelHandler = pixelHandler || function(pixel, r, g, b, a){ // By default, this changes white to transparent.
+			var fuzzines = 2;
+			var oldColor = { r: 255, g: 255, b: 255, a:255 }; // white
+			var newColor = { r: 0, g: 0, b: 0, a:0 };         // transparent
+
+			if (
+				pixel[r] > oldColor.r - fuzziness && pixel[r] < oldColor.r + fuzziness &&
+				pixel[g] > oldColor.g - fuzziness && pixel[g] < oldColor.g + fuzziness &&
+				pixel[b] > oldColor.b - fuzziness && pixel[b] < oldColor.b + fuzziness &&
+				pixel[a] > oldColor.a - fuzziness && pixel[a] < oldColor.a + fuzziness ) // if white then change alpha to 0
+			{
+				//console.log('changing'); 
+				pixel[p+r] = newColor.r; // Make it transparent
+				pixel[p+g] = newColor.g; // Make it transparent
+				pixel[p+b] = newColor.b; // Make it transparent
+				pixel[p+a] = newColor.a; // Make it transparent
+			}
+		}
+
+
+		var pixel = contextData.data;
+		var r=0, g=1, b=2,a=3;
+
+		for (var p = 0; p<pixel.length; p+=4){
+	      	pixelHandler(pixel, p+r, p+g, p+b, p+a);
+	    }
+
+	    destinationContext.putImageData(contextData, 0, 0, 0, 0, destinationContext.canvas.width, destinationContext.canvas.height);
+	}
 
 
 
-	function swapColors(context, contextData, oldColor, newColor, fuzziness){
+
+	function swapColorsOld(context, contextData, oldColor, newColor, fuzziness){
 		fuzziness = fuzziness || 150;
 		oldColor = oldColor || { r: 255, g: 255, b: 255, a:255 }
-		newColor = newColor || { r: 255, g: 0, b: 255, a:0 }
+		newColor = newColor || { r: 0, g: 0, b: 0, a:0 }
+		
+		//fuzziness = 150;
+		//oldColor = { r: 0, g: 0, b: 0, a:255 }
+		//newColor = { r: 0, g: 0, b: 0, a:255 }
 
 
 		var pixel = contextData.data;
@@ -395,6 +514,7 @@ var drawingApp = (function () {
 		for (var p = 0; p<pixel.length; p+=4)
 	    {
 	      	if (
+				pixel[p+a] > oldColor.a - fuzziness && pixel[p+a] < oldColor.a + fuzziness &&
 				pixel[p+r] > oldColor.r - fuzziness && pixel[p+r] < oldColor.r + fuzziness &&
 				pixel[p+g] > oldColor.g - fuzziness && pixel[p+g] < oldColor.g + fuzziness &&
 				pixel[p+b] > oldColor.b - fuzziness && pixel[p+b] < oldColor.b + fuzziness) // if white then change alpha to 0
@@ -455,7 +575,7 @@ var drawingApp = (function () {
 	}
 
 	function matchOutlineColor(r, g, b, a) {
-		return (r + g + b < 100 && a === 255);
+		return (r + g + b < 20 && a > 200); // This used to be == 255, which was too exact. 
 	};
 
 
@@ -467,6 +587,7 @@ var drawingApp = (function () {
 	}
 
 	function matchStartColor (outlineLayerData, colorLayerData, pixelPos, startR, startG, startB) {
+
 
 		var r = outlineLayerData.data[pixelPos],
 			g = outlineLayerData.data[pixelPos + 1],
@@ -481,9 +602,14 @@ var drawingApp = (function () {
 		r = colorLayerData.data[pixelPos];
 		g = colorLayerData.data[pixelPos + 1];
 		b = colorLayerData.data[pixelPos + 2];
+		a = colorLayerData.data[pixelPos + 3];
 
 		// If the current pixel matches the clicked color
 		if (r === startR && g === startG && b === startB) {
+			return true;
+		}
+
+		if(a < 255){ // This makes it so you don't get a fringe when doing a fill due to antialiasing.
 			return true;
 		}
 
@@ -493,7 +619,7 @@ var drawingApp = (function () {
 		}
 
 		// Return the difference in current color and start color within a tolerance
-		return (Math.abs(r - startR) + Math.abs(g - startG) + Math.abs(b - startB) < 255);
+		return (Math.abs(r - startR) + Math.abs(g - startG) + Math.abs(b - startB) < 10 && a > 240  ); // USED TO BE 255
 	}
 
 
@@ -502,7 +628,7 @@ var drawingApp = (function () {
 		var canvasWidth = colorContext.canvas.width;
 		var canvasHeight = colorContext.canvas.height;
 
-		console.log('x', startX, 'y', startY, canvasWidth, canvasHeight)
+		//console.log('x', startX, 'y', startY, canvasWidth, canvasHeight)
 
 		var newPos,
 			x,
@@ -540,12 +666,20 @@ var drawingApp = (function () {
 
 			// Go down as long as the color matches and in inside the canvas
 			while (y <= drawingBoundBottom && matchStartColor(outlineLayerData, colorLayerData, pixelPos, startR, startG, startB)) {
+				
+
+				
+
 				y += 1;
 
 				colorPixel(colorLayerData, pixelPos, curColor.r, curColor.g, curColor.b);
 
+
 				if (x > drawingBoundLeft) {
 					if (matchStartColor(outlineLayerData, colorLayerData, pixelPos - 4, startR, startG, startB)) {
+						
+						
+
 						if (!reachLeft) {
 							// Add pixel to stack
 							pixelStack.push([x - 1, y]);
@@ -558,6 +692,9 @@ var drawingApp = (function () {
 
 				if (x < drawingBoundRight) {
 					if (matchStartColor(outlineLayerData, colorLayerData, pixelPos + 4, startR, startG, startB)) {
+						
+						
+
 						if (!reachRight) {
 							// Add pixel to stack
 							pixelStack.push([x + 1, y]);
@@ -575,7 +712,9 @@ var drawingApp = (function () {
 
 
 	function drawStroke(context, currentClick, lastClick, curColor, curTool){
-		if (!currentClick) { return; }
+		if (!currentClick && !shiftKey) { return; }
+
+
 
 
 		context.beginPath();
@@ -585,18 +724,57 @@ var drawingApp = (function () {
 			context.moveTo(lastClick.x, lastClick.y);
 		} else {
 			// The x position is moved over one pixel so a circle even if not dragging
-			context.moveTo(currentClick.x - 1, currentClick.y);
+			if(!shiftKey){
+				context.moveTo(currentClick.x - 1, currentClick.y);
+			}
+		}
+
+
+		if(shiftKey){
+			currentClick = shiftKey;
 		}
 
 		//console.log(midPt.x, midPt.y, currentClick.x, currentClick.y);
 
 		//context.quadraticCurveTo(midPt.x, midPt.y, currentClick.x, currentClick.y);
+
+
 		context.lineTo(currentClick.x, currentClick.y);
 
 		// Set the drawing color
 		if (curTool === "eraser") {
-			context.strokeStyle = 'white';
+
+			context.globalCompositeOperation = "destination-out";
+			context.strokeStyle = "rgba(0,0,0,1)";
+
+
+			if(ctrlKey){
+
+				contexts.outline.globalCompositeOperation = "destination-out";
+				contexts.outline.strokeStyle = "rgba(0,0,0,1)";
+
+				contexts.outline.beginPath();
+
+				if (currentClick && lastClick) {
+					contexts.outline.moveTo(lastClick.x, lastClick.y);
+				} else {
+					// The x position is moved over one pixel so a circle even if not dragging
+					contexts.outline.moveTo(currentClick.x - 1, currentClick.y);
+				}
+
+				contexts.outline.lineTo(currentClick.x, currentClick.y);
+				contexts.outline.lineCap = "round";
+				contexts.outline.lineJoin = "round";
+				contexts.outline.lineWidth = curSize;
+				contexts.outline.stroke();
+				contexts.outline.closePath();
+				contexts.outline.globalCompositeOperation ="source-over";
+			}
+
+
+
 		} else {
+			context.globalCompositeOperation ="source-over";
 			context.strokeStyle = "rgb(" + curColor.r + ", " + curColor.g + ", " + curColor.b + ")";
 			//context.strokeStyle = "rgba(" + curColor.r + ", " + curColor.g + ", " + curColor.b + ", 0.1)";
 		}

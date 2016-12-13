@@ -4,7 +4,7 @@
 
 @if(!Auth::guest())
 	@section('settings')
-		<i class="fa fa-cog" aria-hidden="true" onclick="app.showEditBook(true)"></i>
+		<i class="edit-entity fa fa-cog" title="Edit Book" aria-hidden="true" onclick="app.showEditBook(true)"></i>
 	@stop
 @endif
 
