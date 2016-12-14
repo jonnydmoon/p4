@@ -14,6 +14,7 @@ Route::post("/move-coloring-page", "PageController@moveColoringPage")->name("mov
 
 
 Route::get("/", "BookController@index")->name("root");
+Route::get("/about", function () { return view('about'); })->name("about");
 Route::get('/home', 'BookController@index');
 
 

@@ -155,6 +155,11 @@ class BookController extends Controller
             return response()->json(['errors'=> ['You do not have permission to delete this book.'] ]);
         }
 
+        DB::table('pages')
+            ->where('book_id', $id)
+            ->update(['book_id' => null]);
+
+
         $book->delete();
         return response()->json(['result'=> true ]);
     }

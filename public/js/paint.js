@@ -47,6 +47,7 @@ var drawingApp = (function () {
 		curColor = colorGreen,
 		currentClick = null,
 		lastClick = null,
+		lastClickForShift = null,
 		lastMid = null,
 		midPt = null,
 		z = 0,
@@ -62,6 +63,7 @@ var drawingApp = (function () {
 				y:y,
 				dragging:dragging
 			};
+
 
 			//lastMid = lastMid || currentClick;
 			//midPt = lastMid;
@@ -151,6 +153,7 @@ var drawingApp = (function () {
 					if (curTool !== "bucket") {
 						paint = false;
 					}
+					lastClickForShift = currentClick;
 					currentClick = null;
 					redraw();
 				},
@@ -172,9 +175,9 @@ var drawingApp = (function () {
 
 					//console.log("Mouse", mouseX, mouseY);	
 
-					ctrlKey = e.ctrlKey;
+					ctrlKey = e.ctrlKey || e.metaKey;
 					shiftKey = e.shiftKey ? {x: e.pageX - this.offsetLeft, y:e.pageY - this.offsetTop} : false;
-
+					console.log('shiftKey', shiftKey);
 
 					if (curTool === "bucket") {
 						// Mouse click location on drawing area
@@ -211,6 +214,7 @@ var drawingApp = (function () {
 
 				releaseDrawing = function () {
 					mouseDown = false;
+					lastClickForShift = currentClick;
 					currentClick = null;
 					if (curTool !== "bucket") {
 						paint = false;
@@ -454,7 +458,7 @@ var drawingApp = (function () {
 			var fuzziness = 150;
 
 			if(isMatch(pixel[r], pixel[g], pixel[b], pixel[a], blackColor, fuzziness)){ 
-//				setColor(pixel, r, blackColor); 
+				setColor(pixel, r, blackColor); 
 			} // Set dark colors to black
 			else{  setColor(pixel, r, transparentColor); }
 
@@ -714,9 +718,6 @@ var drawingApp = (function () {
 	function drawStroke(context, currentClick, lastClick, curColor, curTool){
 		if (!currentClick && !shiftKey) { return; }
 
-
-
-
 		context.beginPath();
 		
 		// If dragging then draw a line between the two points
@@ -724,14 +725,13 @@ var drawingApp = (function () {
 			context.moveTo(lastClick.x, lastClick.y);
 		} else {
 			// The x position is moved over one pixel so a circle even if not dragging
-			if(!shiftKey){
 				context.moveTo(currentClick.x - 1, currentClick.y);
-			}
 		}
 
 
 		if(shiftKey){
-			currentClick = shiftKey;
+			currentClick = lastClickForShift;
+			shiftKey = null;
 		}
 
 		//console.log(midPt.x, midPt.y, currentClick.x, currentClick.y);

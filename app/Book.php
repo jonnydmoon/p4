@@ -20,7 +20,8 @@ class Book extends Model
 
     public function getCoverPath(){
     	if($this->cover){
-    		return 'images/pages/thumbs/' . $this->cover->outline_url;
+    		$url = $this->cover->colored_url ? $this->cover->colored_url :  $this->cover->outline_url;
+    		return 'images/pages/thumbs/' . $url;
     	}
     }
 }

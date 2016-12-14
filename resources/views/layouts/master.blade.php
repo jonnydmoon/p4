@@ -27,6 +27,7 @@
 
 	<script src="https://cdn.jsdelivr.net/lodash/4.16.3/lodash.min.js"></script>
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js" integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E=" crossorigin="anonymous"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/ace/1.2.4/min/ace.js"></script>
 	<script type="text/javascript" src="{{ URL::asset('js/paint.js') }}"></script>
@@ -38,13 +39,16 @@
 				<div class="logo">
 					<a href="{{ URL::route('root') }}"><img src="{{ URL::asset('images/logo.png') }}" /></a>
 				</div>
+				
+				@if (!Request::is('pages*'))
+					<div class="header-links">
+						<a href="{{ URL::route('about') }}">About</a>
+					</div>
+				@endif
+		
 
 				@yield('toolset', '')
 			</div>
-
-
-
-
 			<div class="authentication-links">
 			@if (Auth::guest() && !Request::is('login*'))
                 <a href="{{ url('/login') }}">Login</a>
@@ -62,12 +66,6 @@
 
             @yield('toolset_links', '')
             </div>
-
-
-
-
-
-
 	</header>
 
 	<div id='messageArea'>
@@ -86,13 +84,13 @@
 	</div>
 
 	<div class="main">
-		
 		<main class="main-content ">
 			{{-- Global error section --}}
-			
-
 			@if($__env->yieldContent('title'))
 			<h1>
+				@if(Request::is('books/*'))
+					<a href="{{ url('/') }}" class="home-icon" droppable="true" data-book-id="null"><i class="fa fa-home" title="Home" aria-hidden="true"></i></a> 
+				@endif
 				@yield('title')
 				@if($__env->yieldContent('settings'))
 					@yield('settings')
@@ -103,29 +101,23 @@
 			{{-- Main page content --}}
 			@yield('content')
 		</main>
-
 		<div class="fullscreen-popover"></div>
 	</div>
-
 
 	<div class='loading-overlay'></div>
 
 	<script type="text/template" data-name="pageForm">
 		<h1><%- data.pageTitle %></h1>
-
 		<label>
 			<span>Name:</span> <input name="name" type="text" value="<%- data.name %>" />
 		</label>
 		<br /><br />
-
 		<input type="file" name="photo" id="file-input">
 		<div class="small-text">* JPG or PNG format. Black and white preferred.</div>
 
 		<button class="btn" onclick="app.hideFullscreenPopover()">Cancel</button>
 		<button type="submit" name="userSubmitted" class="btn btn-success" onclick="app.editPage()">Submit</button>
 	</script>
-
-
 
 	<script type="text/template" data-name="bookForm">
 		<h1>
@@ -134,16 +126,13 @@
 				<i class="delete-entity fa fa-trash-o" title="Delete Book" aria-hidden="true" onclick="app.deleteBook(<%- data.id %>)"></i>
 			<%}%>
 		</h1>
-
 		<label>
 			<span>Name:</span> <input name="name" type="text" value="<%- data.name %>" />
 		</label>
 		<br /><br />
-
 		<button class="btn" onclick="app.hideFullscreenPopover()">Cancel</button>
 		<button type="submit" name="userSubmitted" class="btn btn-success" onclick="app.editBook(<%- data.id %>)">Submit</button>
 	</script>
-
 
 	<script type="text/template" data-name="saveColoringForm">
 		<h1>
@@ -152,7 +141,6 @@
 				<i class="delete-entity fa fa-trash-o" title="Delete Page" aria-hidden="true" onclick="app.deletePage(<%- data.id %>)"></i>
 			<%}%>		
 		</h1>
-
 		<label>
 			<span>Name:</span> <input name="name" type="text" value="<%- data.name %>" />
 		</label>
@@ -161,10 +149,7 @@
 		<div class="advanced-section">
 			<input type="checkbox" id="update-black-lines" /> Update base area (your image should only be black and white).
 		</div>
-
-
 		<br /><br />
-
 		<button class="btn" onclick="app.hideFullscreenPopover()">Cancel</button>
 		<% if(data.isOwner){ %>
 			<button type="submit" name="userSubmitted" class="btn btn-success" onclick="app.saveColoredPage()">Save</button>
@@ -172,18 +157,12 @@
 		<button type="submit" name="userSubmitted" class="btn btn-success" onclick="app.saveColoredPage(true)">Save As</button>
 	</script>
 
-
-
 	<script type="text/template" data-name="flashMessage">
 		<div class="alert alert-danger" data-dismiss="alert" role="alert">
 			<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
 			<strong>Error</strong> <%- data.message %>
 		</div>
 	</script>
-
-
-
-
 
 	<script src="{{ URL::asset('js/app.js') }}"></script>
 	<script>

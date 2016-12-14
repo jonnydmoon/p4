@@ -34,7 +34,7 @@ class PagesTableSeeder extends Seeder
                     ["Bird", "58466eeb747a2.png", 1 ],
                     ["Polar Bear", "58466ef7911df.png", 1 ],
                     ["Crocodile", "58466f0e75698.png", 1 ],
-                    ["Elephant", "58466f1c0329a.png", 1 ],
+                    ["Elephant", "5850b93362f79.png", 1 ],
                     ["Leopards", "58466f33abed6.png", 1 ],
                     ["Moth", "58466f3e86973.png", 1 ],
                     ["Oryx", "58466f4ad987f.png", 1 ],
@@ -59,8 +59,6 @@ class PagesTableSeeder extends Seeder
                     ["Dinosaur", "584670824d07b.png", 1 ],
                     ["Dragon", "58467093c0585.png", 1 ],
                     ["Dragon", "5846709f6f5a2.png", 1 ],
-                    ["Dinosaur", "584670accf2d9.png", 1 ],
-                    ["Dinosaur", "584670b828609.png", 1 ],
                     ["Animals", "584670c262a81.png", 1 ],
                     ["Boat", "58479845d253f.png", 2 ],
                     ["Boat", "58479850c2179.png", 2 ],
@@ -175,8 +173,6 @@ class PagesTableSeeder extends Seeder
                     ["House", "584816c959fcf.png", 3 ]
                 ];
 
-
-
         foreach($pages as $page){
             DB::table('pages')->insert([
                 'name' => $page[0],
@@ -188,6 +184,32 @@ class PagesTableSeeder extends Seeder
                 'updated_at' => Carbon\Carbon::now()->toDateTimeString(),
             ]);
         }
+
+
+        $pages = [
+            ["Jill's Flower","58479cdc4991b.png","584ff990c0fd8.png",NULL,2],
+            ["Horse","58466e7943225.png","585002ac38508.png",NULL,2],
+            ["Flower","58479d2f2e15c.png","585018a8eb301.png","6", 2],
+            ["Cardinal","584670459f543.png","5850b373c1377.png","6", 2],
+            ["House","584816a95a769.png","5850b431bdb3f.png","7", 3],
+            ["House","584816c08a546.png","5850b6a61dd5e.png","7", 3],
+            ["Car","5847999265177.png","5850b81ad8efd.png",NULL, 3],
+            ["Elephant","58466f1c0329a.png","5850b848678a4.png",NULL, 3]
+        ];
+
+        foreach($pages as $page){
+            DB::table('pages')->insert([
+                'name' => $page[0],
+                'user_id' => $page[4],
+                'book_id' => $page[3],
+                'outline_url' => $page[1],
+                'colored_url' => $page[2],
+                'created_at' => Carbon\Carbon::now()->toDateTimeString(),
+                'updated_at' => Carbon\Carbon::now()->toDateTimeString(),
+            ]);
+        }
+
+
 
         
     }

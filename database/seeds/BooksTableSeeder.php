@@ -51,6 +51,22 @@ class BooksTableSeeder extends Seeder
 			'is_public' => 1,
 		]);
 
+		DB::table('books')->insert([
+			'name' => 'Jill\'s Book',
+			'created_at' => Carbon\Carbon::now()->toDateTimeString(),
+			'updated_at' => Carbon\Carbon::now()->toDateTimeString(),
+			'user_id' => 2,
+			'is_public' => 0,
+		]);
+
+		DB::table('books')->insert([
+			'name' => 'Houses',
+			'created_at' => Carbon\Carbon::now()->toDateTimeString(),
+			'updated_at' => Carbon\Carbon::now()->toDateTimeString(),
+			'user_id' => 3,
+			'is_public' => 0,
+		]);
+
 
 
 

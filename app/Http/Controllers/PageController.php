@@ -157,7 +157,7 @@ class PageController extends Controller
 			// SAVE AS: CREATE A NEW PAGE
 			$page = new Page();
 			$page->name = $output['name'];
-			$page->book_id = $output['book_id'];
+			$page->book_id = $originalPage->user_id === Auth::id() ? $output['book_id'] : null;
 			$page->user_id = Auth::id();
 			$page->outline_url = $originalPage->outline_url;
 
@@ -197,6 +197,10 @@ class PageController extends Controller
 
 
 	private function validateSaveColoringPage($input){
+		if($input['book_id'] === 'null'){
+			$input['book_id'] = null;
+		}
+
 		$defaults = [
 			'name' => '',
 			'id' => '',
@@ -246,6 +250,10 @@ class PageController extends Controller
 
 
 	private function validateMoveColoringPage($input){
+		if($input['book_id'] === 'null'){
+			$input['book_id'] = null;
+		}
+
 		$defaults = [
 			'id' => '',
 			'book_id' => null,
@@ -256,7 +264,8 @@ class PageController extends Controller
 		$output = []; // Output are variables that will be available to the html page.
 		$output['errors'] = [];
 		CustomValidator::validateField($input, $output, $defaults, 'id', 'required|numeric', null, true);        
-		CustomValidator::validateField($input, $output, $defaults, 'book_id', 'numeric|nullable', null, true);
+		CustomValidator::validateField($input, $output, $defaults, 'book_id', 'numeric|nullable');
+
 		return $output;
 	}
 

@@ -87,6 +87,42 @@ $('.save-page-button').on('click', function(e){
 })
 
 
+ $('[draggable=true]').draggable({
+	cursor:'move',
+	revert: true
+ });
+
+ $('[droppable=true]').droppable({
+	classes: {
+		"ui-droppable-hover": "droppable-hover",
+		"ui-droppable-active": "droppable-active"
+	},
+	tolerance: 'pointer',
+	drop: function(event, ui){
+		console.log(ui);
+		var pageId = ui.draggable.data('page-id');
+
+		var book_id = $(this).data('book-id');
+		book_id = book_id === 'null' ? null : book_id;
+
+		var data = new FormData();
+
+		data.append('book_id', book_id);
+		data.append('id', pageId);
+
+		ui.draggable.remove();
+
+		ajax('POST', '/move-coloring-page', data).then(function(data){
+			if(data.result){
+				
+			}
+		});
+	}
+ });
+
+
+
+
 
 function ajax(type, url, data){
 	$.ajaxSetup({
@@ -112,7 +148,7 @@ function ajax(type, url, data){
 		dataType: 'json',
 		cache: false,
 		processData: false, // Don't process the files
-        contentType: false, // Set content type to 
+		contentType: false, // Set content type to 
 	}).then(function(data){
 		if(data.errors && !_.isEmpty(data.errors)){
 			app.flash(_.values(data.errors));
@@ -182,19 +218,19 @@ app.showEditPage = function(){
 app.editPage = function(){
 	var files = $('#file-input').get(0).files;
 	var data = new FormData();
-    $.each(files, function(key, value)
-    {
-        data.append('photo', value, value.name);
-    });
+	$.each(files, function(key, value)
+	{
+		data.append('photo', value, value.name);
+	});
 
 
-    if(app.currentBook){
+	if(app.currentBook){
 		data.append('book_id', app.currentBook.id);
 	}
 
-    data.append('name', $('input[name="name"]').val());
+	data.append('name', $('input[name="name"]').val());
 
-   	ajax('POST', '/pages', data).then(function(data){
+	ajax('POST', '/pages', data).then(function(data){
 		document.location.reload();
 	});
 }
@@ -220,9 +256,9 @@ app.showEditBook = function(useCurrentBook){
 app.editBook = function(id){
 
 	var data = new FormData();
-    data.append('name', $('input[name="name"]').val());
+	data.append('name', $('input[name="name"]').val());
 
-   	ajax(id ? 'PUT' : 'POST', '/books' + (id ? '/'+ id : '' ), data).then( function(data){
+	ajax(id ? 'PUT' : 'POST', '/books' + (id ? '/'+ id : '' ), data).then( function(data){
 		app.redirectTo('/books/' + data.book.id);
 	});
 }
@@ -230,22 +266,22 @@ app.editBook = function(id){
 app.saveColoredPage = function(doSaveAs){
 
 	var data = new FormData();
-    data.append('name', $('input[name="name"]').val());
-    data.append('img', drawingApp.save());
-    data.append('thumb', drawingApp.saveThumb());
-    data.append('outline', drawingApp.saveOutline());
-    data.append('book_id', app.currentPage.book_id);
-    data.append('id', app.currentPage.id);
-    data.append('saveAs', doSaveAs ? 1 : 0);
+	data.append('name', $('input[name="name"]').val());
+	data.append('img', drawingApp.save());
+	data.append('thumb', drawingApp.saveThumb());
+	data.append('outline', drawingApp.saveOutline());
+	data.append('book_id', app.currentPage.book_id);
+	data.append('id', app.currentPage.id);
+	data.append('saveAs', doSaveAs ? 1 : 0);
 
 
-    var saveOutline = $('#update-black-lines').is(':checked');
+	var saveOutline = $('#update-black-lines').is(':checked');
 
-    if(saveOutline){
-    	data.append('saveOutline', saveOutline ? 1 : 0);
-    }
+	if(saveOutline){
+		data.append('saveOutline', saveOutline ? 1 : 0);
+	}
 
-   	ajax('POST', '/coloring-page', data).then(function(data){
+	ajax('POST', '/coloring-page', data).then(function(data){
 		if(data.id == app.currentPage.id){
 			document.location.reload();
 		}
@@ -257,56 +293,66 @@ app.saveColoredPage = function(doSaveAs){
 
 app.deleteBook = function(id){
 	if(!confirm('Are you sure you want to delete this book?')){ return; }
-   	ajax('DELETE', '/books/' + id).then( function(data){
+	ajax('DELETE', '/books/' + id).then( function(data){
 		app.redirectTo('/books');
 	});
 }
 
 app.deletePage = function(id){
 	if(!confirm('Are you sure you want to delete this page?')){ return; }
-   	ajax('DELETE', '/pages/' + id).then( function(data){
+	ajax('DELETE', '/pages/' + id).then( function(data){
 		app.redirectTo('/books/' + app.currentPage.book_id);
 	});
 }
 
-app.onPageDragStart = function(event, id){
-	app.currentlyDraggedPage = event.currentTarget;
-	var crt = event.currentTarget.cloneNode(true);
-    crt.style.position = "absolute"; crt.style.top = "-50px"; crt.style.right = "0px";
-    document.body.appendChild(crt);
-    event.dataTransfer.setDragImage(crt, 100, 100);
-	event.dataTransfer.setData("text", id);
-}
+app.initColoringPage = function(){
+	
 
-app.onDropBook = function(event, id){
-	event.preventDefault();
-    var pageId = event.dataTransfer.getData("text");
 
-    var data = new FormData();
-    data.append('book_id', id);
-    data.append('id', pageId);
 
-    ajax('POST', '/move-coloring-page', data).then(function(data){
-		if(data.result){
-			$(app.currentlyDraggedPage).remove();
+
+	$(document).keydown(function(e){
+
+		var arrow = {left: 37, up: 38, right: 39, down: 40 }
+		if (e.keyCode == arrow.left) { 
+			if(currentTool == 'eraser'){ currentTool = 'bucket'; }
+			else if(currentTool == 'bucket'){ currentTool = 'marker'; }
+			else if(currentTool == 'marker'){ currentTool = 'eraser'; }
+			drawingApp.setTool(currentTool);
+			render();
+			return false;
+		}
+		if (e.keyCode == arrow.right) { 
+			if(currentTool == 'eraser'){ currentTool = 'marker'; }
+			else if(currentTool == 'bucket'){ currentTool = 'eraser'; }
+			else if(currentTool == 'marker'){ currentTool = 'bucket'; }
+			drawingApp.setTool(currentTool);
+			render();
+			return false;
+		}
+		if (e.keyCode == arrow.down) { 
+			if(currentSize == '100'){ currentSize = '60'; }
+			else if(currentSize == '60'){ currentSize = '40'; }
+			else if(currentSize == '40'){ currentSize = '20'; }
+			else if(currentSize == '20'){ currentSize = '10'; }
+			else if(currentSize == '10'){ currentSize = '5'; }
+			drawingApp.setSize(currentSize);
+			render();
+			return false;
+		}
+		if (e.keyCode == arrow.up) { 
+			if(currentSize == '60'){ currentSize = '100'; }
+			else if(currentSize == '40'){ currentSize = '60'; }
+			else if(currentSize == '20'){ currentSize = '40'; }
+			else if(currentSize == '10'){ currentSize = '20'; }
+			else if(currentSize == '5'){ currentSize = '10'; }
+			drawingApp.setSize(currentSize);
+			render();
+			return false;
 		}
 	});
-
 }
 
-app.onDragOverBook = function(event, id){
-	event.preventDefault();
+if(app.isColoringPage){
+	app.initColoringPage();
 }
-
-app.onDragEnterBook = function(event, id){
-	event.preventDefault();
-	$(event.currentTarget).toggleClass('drag-hover', true);
-}
-
-app.onDragLeaveBook = function(event, id){
-	event.preventDefault();
-	$(event.currentTarget).toggleClass('drag-hover', false);
-}
-
-document.ondragstart = function(){$('body').toggleClass('dragging', true);}
-document.ondragend = function(){$('body').toggleClass('dragging', false);  $('.drag-hover').removeClass('drag-hover')}
