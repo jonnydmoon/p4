@@ -44,7 +44,7 @@ If the user is the owner of a coloring page, the page supports drag and drop on 
 
 ## CRUD Operations
 You must be logged in to perform the CRUD operations, which include all operations for both Coloring Books and Pages:
-* Create - On the home page a user can "Add a Coloring Book". Once inside a book, a user can "Add a page". In addition, when users save a coloring page, they can chose "Save As" which also creates a new page. 
+* Create - On the home page a user can "Add a Coloring Book". Once inside a book, a user can "Add a page". In addition, when users save a coloring page, they can choose "Save As" which also creates a new page. 
 * Read - On the home page all the books are displayed. Click a book to view the pages for that book.
 * Update - When viewing a coloring book that you own, a gear icon will be next to the title of the book in the header. Clicking this allows a user to edit the book name. For coloring pages, if a user is the owner, they can click the save icon at the top of the page after coloring the page. This allow a user to also modify the name. Updates are also performed when a user drags pages around to books.
 * Delete - There is delete icon that is next to the book/page title in the edit screens displayed in the previous bullet point. This deletes the book/page.
