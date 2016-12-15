@@ -252,6 +252,10 @@ app.deleteBook = function(id){
 app.deletePage = function(id){
 	if(!confirm('Are you sure you want to delete this page?')){ return; }
 	ajax('DELETE', '/pages/' + id).then( function(data){
+		if(!app.currentPage.book_id){
+			app.redirectTo('/');
+			return;
+		}
 		app.redirectTo('/books/' + app.currentPage.book_id);
 	});
 }

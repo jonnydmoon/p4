@@ -323,7 +323,12 @@ class PageController extends Controller
 	 */
 	private function getAuthenticatedPage($page_id, $allowPublicBooks = false){
 		$page = Page::with('book')->find($page_id);
-		if( !$page_id || ($allowPublicBooks && $page->book &&  $page->book->is_public) || ($page->user_id === Auth::id())){
+
+		if(!$page || !$page_id){
+			return null;
+		}
+
+		if(($allowPublicBooks && $page->book &&  $page->book->is_public) || ($page->user_id === Auth::id())){
 			return $page;
 		}
 		return null;

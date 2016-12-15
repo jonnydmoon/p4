@@ -141,6 +141,11 @@ class BookController extends Controller
 	 */
 	private function getAuthenticatedBook($book_id, $allowPublicBooks = false){
 		$book = Book::find($book_id);
+
+		if(!$book){
+			return null;
+		}
+
 		if( ($allowPublicBooks && $book->is_public) || ($book->user_id === Auth::id())){
 			return $book;
 		}
