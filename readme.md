@@ -29,7 +29,7 @@ my application. Some notable changes include:
 
 Once logged in, a user has the ability to click on their name to edit his/her email or password.
 
-In order to upload, edit, create, ands save pages and books, a user must be logged in.
+In order to upload, edit, create, and save pages and books, a user must be logged in.
 
 Whenever a coloring page is saved, I actually save 2 portions. One layer is the base layer with the black outlines.
 The other layer is the colored layer. This allows a user to come back to a drawing later on and modify the coloring
@@ -39,6 +39,8 @@ When a coloring page is saved, if it does not have a book, it will be placed in 
 A user can drag and drop these pages to their own coloring books.
 
 Most of the forms use ajax for submission.
+
+If the user is the owner of a coloring page, the page supports drag and drop on books and the home icon.
 
 ## CRUD Operations
 You must be logged in to perform the CRUD operations, which include all operations for both Coloring Books and Pages:
