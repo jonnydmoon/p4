@@ -293,6 +293,11 @@ app.initColoringPage = function(){
 
 	$(document).keydown(function(e){
 		// Handle some keyboard shortcuts.
+		// 
+		if($(e.target).is('input')){
+			return true;
+		}
+
 		var arrow = {left: 37, up: 38, right: 39, down: 40 }
 		if (e.keyCode == arrow.left) { 
 			if(currentTool == 'eraser'){ currentTool = 'bucket'; }
@@ -300,7 +305,7 @@ app.initColoringPage = function(){
 			else if(currentTool == 'marker'){ currentTool = 'eraser'; }
 			drawingApp.setTool(currentTool);
 			render();
-			return false;
+			return true;
 		}
 		if (e.keyCode == arrow.right) { 
 			if(currentTool == 'eraser'){ currentTool = 'marker'; }
@@ -308,7 +313,7 @@ app.initColoringPage = function(){
 			else if(currentTool == 'marker'){ currentTool = 'bucket'; }
 			drawingApp.setTool(currentTool);
 			render();
-			return false;
+			return true;
 		}
 		if (e.keyCode == arrow.down) { 
 			if(currentSize == '100'){ currentSize = '60'; }
@@ -318,7 +323,7 @@ app.initColoringPage = function(){
 			else if(currentSize == '10'){ currentSize = '5'; }
 			drawingApp.setSize(currentSize);
 			render();
-			return false;
+			return true;
 		}
 		if (e.keyCode == arrow.up) { 
 			if(currentSize == '60'){ currentSize = '100'; }
@@ -328,7 +333,7 @@ app.initColoringPage = function(){
 			else if(currentSize == '5'){ currentSize = '10'; }
 			drawingApp.setSize(currentSize);
 			render();
-			return false;
+			return true;
 		}
 	});
 }

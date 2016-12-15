@@ -563,14 +563,11 @@ var drawingApp = (function () {
 
 			// Go down as long as the color matches and in inside the canvas
 			while (y <= drawingBoundBottom && matchStartColor(outlineLayerData, colorLayerData, pixelPos, startR, startG, startB)) {
-				y += 1;
-
+				
 				colorPixel(colorLayerData, pixelPos, curColor.r, curColor.g, curColor.b);
 
-				if (x > drawingBoundLeft) {
+				if (x >= drawingBoundLeft) {
 					if (matchStartColor(outlineLayerData, colorLayerData, pixelPos - 4, startR, startG, startB)) {
-						
-						
 
 						if (!reachLeft) {
 							// Add pixel to stack
@@ -582,11 +579,9 @@ var drawingApp = (function () {
 					}
 				}
 
-				if (x < drawingBoundRight) {
+				if (x <= drawingBoundRight) {
 					if (matchStartColor(outlineLayerData, colorLayerData, pixelPos + 4, startR, startG, startB)) {
 						
-						
-
 						if (!reachRight) {
 							// Add pixel to stack
 							pixelStack.push([x + 1, y]);
@@ -596,6 +591,8 @@ var drawingApp = (function () {
 						reachRight = false;
 					}
 				}
+
+				y += 1;
 
 				pixelPos += canvasWidth * 4;
 			}
