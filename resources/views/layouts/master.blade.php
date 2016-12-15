@@ -34,7 +34,7 @@
 	<header >
 			<div class="header-left">
 				<div class="logo">
-					<a href="{{ URL::route('root') }}"><img src="{{ URL::asset('images/logo.png') }}" /></a>
+					<a href="{{ URL::route('root') }}"><img alt="ColoringPages Logo" src="{{ URL::asset('images/logo.png') }}" /></a>
 				</div>
 				
 				@if (!Request::is('pages*'))
@@ -85,7 +85,7 @@
 			@if($__env->yieldContent('title'))
 			<h1>
 				@if(Request::is('books/*'))
-					<a href="{{ url('/') }}" class="home-icon" droppable="true" data-book-id="null"><i class="fa fa-home" title="Home" aria-hidden="true"></i></a> 
+					<a href="{{ url('/') }}" class="home-icon" data-droppable="true" data-book-id="null"><i class="fa fa-home" title="Home" aria-hidden="true"></i></a> 
 				@endif
 				@yield('title')
 				@if($__env->yieldContent('settings'))

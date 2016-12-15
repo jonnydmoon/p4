@@ -10,7 +10,7 @@ tasks that would most likely be performed by the child's parent, such as uploadi
 pages to color.
 
 ## Demo
-<https://youtu.be/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX>
+<https://youtu.be/8AnRLG702Og>
 
 ## Details for teaching team
 I found a tutorial about how to use html canvas at <http://www.williammalone.com/articles/create-html5-canvas-javascript-drawing-app/>
@@ -22,7 +22,7 @@ my application. Some notable changes include:
 * The paint bucket tool was enhanced to support dragging.
 * The eraser tool was updated to actually erase instead of drawing a white stroke.
 * Added the ability to dynamically load an image and convert the light colors to transparent.
-* Allowed the canvas to scale to the largest possible size availble for the given window size.
+* Allowed the canvas to scale to the largest possible size available for the given window size.
 * Much of the code was refactored to be more modular and reusable.
 * Double clicking the eraser clears all the colored layer.
 * Erasing while pressing Control key will erase the base outline layer.

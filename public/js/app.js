@@ -44,13 +44,13 @@ function render(){
 }
 
 // Makes the coloring pages draggable.
-$('[draggable=true]').draggable({
+$('[data-draggable=true]').draggable({
 	cursor:'move',
 	revert: true
 });
 
 // Makes the books and the home icon be droppables.
-$('[droppable=true]').droppable({
+$('[data-droppable=true]').droppable({
 	classes: {
 		"ui-droppable-hover": "droppable-hover",
 		"ui-droppable-active": "droppable-active"

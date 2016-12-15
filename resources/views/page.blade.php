@@ -12,11 +12,11 @@
 		<div id='paints'></div>
 
 		<div id="tools">
-			<svg width="145" height="27" viewBox="0 0 145 27" title="Marker." data-tool="marker">
+			<svg width="145" height="27" viewBox="0 0 145 27" data-tool="marker">
 				<path fill="#097d4b" d="M911.658,9.824h124.6l0.89,2.044,16.91,7.231a8.748,8.748,0,0,1,.94,3.355,7.921,7.921,0,0,1-.83,3.344l-17.02,7.428-0.89,2.156h-124.6A51.96,51.96,0,0,1,910,23.221,65.352,65.352,0,0,1,911.658,9.824Z" transform="translate(-910 -9)"/>
 				<path fill="#249866" d="M1032.72,36H916.191a48.951,48.951,0,0,1-2.045-13,58.271,58.271,0,0,1,2.045-14H1032.72a56.7,56.7,0,0,1,2,13.723A52.468,52.468,0,0,1,1032.72,36ZM899.663,20.492" transform="translate(-910 -9)"/>
 			</svg>
-			<svg id="Wand" width="145" height="28" title="Wand. Click and drag to fill multiple areas." viewBox="0 0 145 28" data-tool="bucket">
+			<svg id="Wand" width="145" height="28" viewBox="0 0 145 28" data-tool="bucket">
 			  <path fill="#a1a1a1" d="M910,49.927l128.89,5.049v2.049L910,62.073V49.927Z" transform="translate(-910 -42)"/>
 			  <path fill="#ff8d28" d="M1041.24,42l1.72,7.469,5.16-5.593-2.18,7.343L1053.16,49l-5.5,5.25L1055,56l-7.34,1.75,5.5,5.25-7.22-2.219,2.18,7.343-5.16-5.593L1041.24,70l-1.72-7.469-5.16,5.593,2.18-7.343L1029.32,63l5.5-5.25L1027.48,56l7.34-1.75-5.5-5.25,7.22,2.219-2.18-7.343,5.16,5.593Z" transform="translate(-910 -42)"/>
 			</svg>
@@ -53,7 +53,7 @@
 	</div>
 
 	<!-- Modal -->
-	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-body">

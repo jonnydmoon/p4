@@ -515,3 +515,12 @@ button.btn {
 .about-page h4 {
 	margin-top: 40px;
 }
+
+.about-video{
+	float:right;
+	margin-left:20px;
+}
+
+blockquote{
+	font-size:14px;
+}

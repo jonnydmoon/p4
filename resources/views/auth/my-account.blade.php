@@ -7,7 +7,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Your Account</div>
                 <div class="panel-body">
-                    <form class="form-horizontal" role="form" method="POST" action="{{ url('/my-account') }}">
+                    <form class="form-horizontal" method="POST" action="{{ url('/my-account') }}">
                         {{ csrf_field() }}
 
                         <input name="_method" type="hidden" value="PUT">
@@ -29,7 +29,7 @@
                             </div>
                         </div>
 
-                        <label class="update-password-label" for="update_password">Change Password</label> <input type="checkbox" name='update_password' class='update-password' {{ $update_password == 'on' ? 'checked="true"' : '' }} />
+                        <label class="update-password-label" for="update_password">Change Password</label> <input type="checkbox" name='update_password' id="update_password" class='update-password' {{ $update_password == 'on' ? 'checked="true"' : '' }} />
                         <div>
 
                             <div class="form-group">

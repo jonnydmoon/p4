@@ -6,7 +6,12 @@
 
 @section('content')
 	<div class="about-page">
+		<div class="about-video">
+			<iframe width="560" height="315" src="https://www.youtube.com/embed/8AnRLG702Og" frameborder="0" allowfullscreen></iframe>
+		</div>
+
 		<h4>Coloring Pages provide fun and relaxing entertainment for all ages.</h4>
+		
 		<p>Welcome to Coloring Pages- home of online coloring pages. Here you can easily create online coloring pages for your kids using images you find on the web or by uploading your own drawings.</p>
 
 		<p>Coloring Pages help promote creativity in children. In addition, children can save all of their work and build a collection of their own personalized colored pages. </p>
@@ -21,6 +26,20 @@
 			<li>Enjoyable for all ages</li>
 			<li>Save progress of your coloring page</li>
 		</ul>
+
+		<h4>What people are saying about Coloring Pages:</h4>
+
+		<blockquote>
+			<p>Coloring Pages is great for my kids. It is a great way for them to be creative. I enjoy seeing all of their coloring pages. <small>Richelle – age 34</small></p>
+		</blockquote>
+
+		<blockquote>
+			<p>Can I do another one? <small>Mark – age 4</small></p>
+		</blockquote>
+
+		<blockquote>
+			<p>I love to color the animals!<small>Jane – age 6</small></p>
+		</blockquote>
 	</div>
 @stop
 
