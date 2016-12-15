@@ -47,7 +47,7 @@
 			</div>
 			<div class="authentication-links">
 			@if (Auth::guest() && !Request::is('login*'))
-				<a href="{{ url('/login') }}">Login</a>
+				<a href="{{ url('/login') }}">Login / Sign Up</a>
 			@elseif(!Auth::guest())
 				Welcome, <a href="{{ url('/my-account') }}">{{ Auth::user()->name }}</a>! 
 
