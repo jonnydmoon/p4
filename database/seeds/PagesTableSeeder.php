@@ -11,6 +11,7 @@ class PagesTableSeeder extends Seeder
      */
     public function run()
     {
+        // Add all the public pages.
         $pages = [
                     ["Bird", "58466df72a32a.png", 1 ],
                     ["Addax", "58466e06ace30.png", 1 ],
@@ -185,7 +186,7 @@ class PagesTableSeeder extends Seeder
             ]);
         }
 
-
+        // Add the pages for Jamal and Jill
         $pages = [
             ["Jill's Flower","58479cdc4991b.png","584ff990c0fd8.png",NULL,2],
             ["Horse","58466e7943225.png","585002ac38508.png",NULL,2],
@@ -207,11 +208,7 @@ class PagesTableSeeder extends Seeder
                 'created_at' => Carbon\Carbon::now()->toDateTimeString(),
                 'updated_at' => Carbon\Carbon::now()->toDateTimeString(),
             ]);
-        }
-
-
-
-        
+        }  
     }
 }
 

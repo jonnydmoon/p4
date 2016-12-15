@@ -1,10 +1,9 @@
+// Used for the drawingApp.
 var currentColor = '#b11f24';
 var currentTool = 'marker';
 var currentSize = 40;
 
-drawingApp.setColor(currentColor);
-drawingApp.setSize(currentSize);
-
+// Renders the UI for the drawing app.
 function render(){
 	var colors = [
 		'#fff110',
@@ -30,8 +29,7 @@ function render(){
 		'#ffffff',
 		'#898989',
 		'#080808',
-		'#999999',
-
+		'#999999'
 	];
 	
 	var check = '<path fill="white" d="M452.112,35.988l4.193,3.578L464.7,31l3.3,3.534L456.644,46s-6.271-5.975-8.644-6.783Z" transform="scale(0.7 0.7) translate(-444 -25) "/>';
@@ -45,71 +43,26 @@ function render(){
 	$('body').attr('data-tool', currentTool);
 }
 
-render();
-
-$('#paints').on('click', function(e){
-	currentColor = $(e.target).closest('svg').find('circle').attr('fill');
-	drawingApp.setColor(currentColor);
-	render();
-});
-
-$('#tools').on('click', function(e){
-	currentTool = $(e.target).closest('svg').attr('data-tool');
-	drawingApp.setTool(currentTool);
-	render();
-});
-
-
-$('#tools').on('dblclick', function(e){
-	currentTool = $(e.target).closest('svg').attr('data-tool');
-	if(currentTool === 'eraser'){
-		drawingApp.reset();
-	}
-});
-
-
-$('.brush-size').on('click', function(e){
-	currentSize = $(e.target).closest('circle').attr('data-brush');
-	drawingApp.setSize(currentSize);
-	render();
-})
-
-$('.save-page-button').on('click', function(e){
-	
-	var currentPage = app.currentPage || {};
-
-	app.showTemplate('saveColoringForm', {
-		pageTitle: 'Save',
-		name: currentPage.name,
-		id: currentPage.id,
-		isOwner: currentPage.user_id === app.user_id
-	});
-})
-
-
- $('[draggable=true]').draggable({
+// Makes the coloring pages draggable.
+$('[draggable=true]').draggable({
 	cursor:'move',
 	revert: true
- });
+});
 
- $('[droppable=true]').droppable({
+// Makes the books and the home icon be droppables.
+$('[droppable=true]').droppable({
 	classes: {
 		"ui-droppable-hover": "droppable-hover",
 		"ui-droppable-active": "droppable-active"
 	},
 	tolerance: 'pointer',
 	drop: function(event, ui){
-		console.log(ui);
 		var pageId = ui.draggable.data('page-id');
-
 		var book_id = $(this).data('book-id');
 		book_id = book_id === 'null' ? null : book_id;
-
 		var data = new FormData();
-
 		data.append('book_id', book_id);
 		data.append('id', pageId);
-
 		ui.draggable.remove();
 
 		ajax('POST', '/move-coloring-page', data).then(function(data){
@@ -120,10 +73,7 @@ $('.save-page-button').on('click', function(e){
 	}
  });
 
-
-
-
-
+// Base ajax function for app. Handles showing the loading and displayinh errors.
 function ajax(type, url, data){
 	$.ajaxSetup({
 		headers: {
@@ -131,13 +81,11 @@ function ajax(type, url, data){
 		}
 	});
 
-
 	if(type === 'PUT' || type === 'DELETE'){
 		data = data || new FormData();
 		data.append('_method',type);
 		type = 'POST';
 	}
-
 
 	app.loading(true);
 
@@ -163,10 +111,9 @@ function ajax(type, url, data){
 	});
 }
 
-
-
 app.templates = {};
 
+// Search for all the templates and store them as compiled lodash templates.
 $('script[type="text/template"]').each(function(){
 	var $el = $(this);
 	app.templates[$el.data('name')] = _.template($el.html());
@@ -198,31 +145,22 @@ app.flash = function(messages){
 	$('#messageArea').html(messages.map(function(message){ return app.templates.flashMessage({data:{message: message}}); }));
 }
 
-app.createPage = function(){
-	ajax('POST', '/pages', {
-		name: 'hey'
-	}).then(function(data){
-
-		console.log('MY RESULT ',data);
-	});
-}
-
-
-app.showEditPage = function(){
+// Shows the form for editing 
+app.showAddPage = function(){
 	app.showTemplate('pageForm', {
 		pageTitle: 'Add A Coloring Page',
 		name: ''
 	});
 };
 
-app.editPage = function(){
+// Posts a page to the server.
+app.addPage = function(){
 	var files = $('#file-input').get(0).files;
 	var data = new FormData();
 	$.each(files, function(key, value)
 	{
 		data.append('photo', value, value.name);
 	});
-
 
 	if(app.currentBook){
 		data.append('book_id', app.currentBook.id);
@@ -235,8 +173,8 @@ app.editPage = function(){
 	});
 }
 
+// Shows the creaet/edit book form.
 app.showEditBook = function(useCurrentBook){
-
 	var name = '';
 	var id = null;
 
@@ -253,8 +191,8 @@ app.showEditBook = function(useCurrentBook){
 	});
 };
 
+// Posts to the server the new/edited book.
 app.editBook = function(id){
-
 	var data = new FormData();
 	data.append('name', $('input[name="name"]').val());
 
@@ -263,8 +201,20 @@ app.editBook = function(id){
 	});
 }
 
-app.saveColoredPage = function(doSaveAs){
+// Shows the form to save a coloring page.
+$('.save-page-button').on('click', function(e){
+	var currentPage = app.currentPage || {};
 
+	app.showTemplate('saveColoringForm', {
+		pageTitle: 'Save',
+		name: currentPage.name,
+		id: currentPage.id,
+		isOwner: currentPage.user_id === app.user_id
+	});
+});
+
+// Posts the coloring page to the server.
+app.saveColoredPage = function(doSaveAs){
 	var data = new FormData();
 	data.append('name', $('input[name="name"]').val());
 	data.append('img', drawingApp.save());
@@ -273,7 +223,6 @@ app.saveColoredPage = function(doSaveAs){
 	data.append('book_id', app.currentPage.book_id);
 	data.append('id', app.currentPage.id);
 	data.append('saveAs', doSaveAs ? 1 : 0);
-
 
 	var saveOutline = $('#update-black-lines').is(':checked');
 
@@ -291,6 +240,7 @@ app.saveColoredPage = function(doSaveAs){
 	});
 }
 
+// Deletes a book from the server.
 app.deleteBook = function(id){
 	if(!confirm('Are you sure you want to delete this book?')){ return; }
 	ajax('DELETE', '/books/' + id).then( function(data){
@@ -298,6 +248,7 @@ app.deleteBook = function(id){
 	});
 }
 
+// Deletes a page from the server.
 app.deletePage = function(id){
 	if(!confirm('Are you sure you want to delete this page?')){ return; }
 	ajax('DELETE', '/pages/' + id).then( function(data){
@@ -305,14 +256,39 @@ app.deletePage = function(id){
 	});
 }
 
+// Sets everything up for coloring a page.
 app.initColoringPage = function(){
-	
+	drawingApp.setColor(currentColor);
+	drawingApp.setSize(currentSize);
+	render();
 
+	$('#paints').on('click', function(e){
+		currentColor = $(e.target).closest('svg').find('circle').attr('fill');
+		drawingApp.setColor(currentColor);
+		render();
+	});
 
+	$('#tools').on('click', function(e){
+		currentTool = $(e.target).closest('svg').attr('data-tool');
+		drawingApp.setTool(currentTool);
+		render();
+	});
 
+	$('#tools').on('dblclick', function(e){
+		currentTool = $(e.target).closest('svg').attr('data-tool');
+		if(currentTool === 'eraser'){
+			drawingApp.reset();
+		}
+	});
+
+	$('.brush-size').on('click', function(e){
+		currentSize = $(e.target).closest('circle').attr('data-brush');
+		drawingApp.setSize(currentSize);
+		render();
+	})
 
 	$(document).keydown(function(e){
-
+		// Handle some keyboard shortcuts.
 		var arrow = {left: 37, up: 38, right: 39, down: 40 }
 		if (e.keyCode == arrow.left) { 
 			if(currentTool == 'eraser'){ currentTool = 'bucket'; }

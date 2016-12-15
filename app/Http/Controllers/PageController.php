@@ -21,29 +21,8 @@ class PageController extends Controller
 	const THUMB_DIR = __DIR__ . '/../../../public/images/pages/thumbs/'; // Where to cache the images.
 	const THUMB_WIDTH = 192;
 	const THUMB_HEIGHT = 98;
-
-
-	/**
-	 * Display a listing of the resource.
-	 *
-	 * @return \Illuminate\Http\Response
-	 */
-	public function index()
-	{
-		//
-	}
-
-	/**
-	 * Show the form for creating a new resource.
-	 *
-	 * @return \Illuminate\Http\Response
-	 */
-	public function create()
-	{
-		
-
-		return Response::json(); 
-	}
+	const HEIGHT = 980;
+	const WIDTH = 1920;
 
 	/**
 	 * Store a newly created resource in storage.
@@ -59,23 +38,16 @@ class PageController extends Controller
 			return response()->json($output);
 		}
 
-
 		$filename = $output['photo']->getClientOriginalName();
 		$baseDirName = 'images/pages/';
 
-		$height = 980;
-		$width = 1920;
-
-		$thumbHeight = self::THUMB_HEIGHT;
-		$thumbWidth = self::THUMB_WIDTH;
-
-		// SHRINK TO FIT SECTION
+		// SHRINK TO FIT SECTION. Upload the image and resize it to the standard size.
 		$filename = uniqid() . '.png';
 		$output['images'][] = ['src'=> $baseDirName . $filename];
 		\Image::make($output['photo'])
-			->heighten($height)
-			->widen($width, function($constraint){  $constraint->upsize(); })
-			->resizeCanvas($width, $height)
+			->heighten(self::HEIGHT)
+			->widen(self::WIDTH, function($constraint){  $constraint->upsize(); })
+			->resizeCanvas(self::WIDTH, self::HEIGHT)
 			->save(self::IMAGE_DIR . $filename, 90);
 
 		$this->saveThumb(self::IMAGE_DIR . $filename, $filename);
@@ -87,10 +59,15 @@ class PageController extends Controller
 		$page->outline_url = $filename;
 		$page->save();
 
-		return response()->json(['a'=>'1']);
+		return response()->json(['result'=> true]);
 	}
 
-
+	/**
+	 * Validate the request for the store method.
+	 *
+	 * @param  $input - Associative array keyed by the name.
+	 * @return $output - Associative array with clean values and errors if necessary.
+	 */
 	private function validateStore($input){
 		$defaults = [
 			'name' => '',
@@ -106,15 +83,22 @@ class PageController extends Controller
 		CustomValidator::validateField($input, $output, $defaults, 'book_id', 'required|numeric', null, true);        
 		CustomValidator::validateField($input, $output, $defaults, 'photo', "max:10000|mimes:jpg,jpeg,png|required", 'You must submit a file and it must be less than 10mb and be .jpg or .png');
 
+		if(Auth::guest()){
+			$output['errors']['user'] = 'Please log in.';
+		}
 
 		return $output;
 	}
 
-
+	/**
+	 * Saves a coloring page. If the user does not own the original, a new page is created.
+	 *
+	 * @param  $request
+	 * @return json response.
+	 */
 	public function saveColoringPage(Request $request)
 	{
 		$output = $this->validateSaveColoringPage($request->all());
-
 		$originalPage = $this->getAuthenticatedPage($output['id'], true);
 
 		if(is_null($originalPage)) {
@@ -125,36 +109,37 @@ class PageController extends Controller
 			return response()->json($output);
 		}
 
-
+		// If we are not saving the outline, we need to save the 
 		if(!$output['saveOutline']){
-			$filename = $this->saveUploadedBase64Image($_POST['img']);
-			$thumbFilename = $this->saveUploadedBase64Image($_POST['thumb']);
+			$filename = $this->saveUploadedBase64Image($output['img']);
+			$thumbFilename = $this->saveUploadedBase64Image($output['thumb']);
 			$this->saveThumb(self::IMAGE_DIR . $thumbFilename, $filename);
 			unlink(self::IMAGE_DIR . $thumbFilename);
 		}	
 
-
+		// If the user owns the page, and the user is not creating a new page, then just update the original page.
 		if($originalPage->user_id === Auth::id() && $output['saveAs'] != 1){
 			$page = $originalPage;
 			$page->name = $output['name'];
 			
-
+			// Remove the old colored url if it exists.
 			if($page->colored_url){
 				if(file_exists(self::IMAGE_DIR . $page->colored_url)) { unlink(self::IMAGE_DIR . $page->colored_url); }
 				if(file_exists(self::THUMB_DIR . $page->colored_url)) { unlink(self::THUMB_DIR . $page->colored_url); }
 			}
 
+			// We are updating the outline, keeping the same name.
 			if($output['saveOutline'] ){
+				// Remove the old outline_url if we are saving a new outline.
 				if($page->outline_url){
 					if(file_exists(self::IMAGE_DIR . $page->outline_url)) { unlink(self::IMAGE_DIR . $page->outline_url); }
 					if(file_exists(self::THUMB_DIR . $page->outline_url)) { unlink(self::THUMB_DIR . $page->outline_url); }
 				}
-				$outlineFilename = $this->saveUploadedBase64Image($_POST['outline'], $page->outline_url); // Save using the same outline url.
+				$outlineFilename = $this->saveUploadedBase64Image($output['outline'], $page->outline_url); // Save using the same outline url.
 				$this->saveThumb(self::IMAGE_DIR . $outlineFilename, $outlineFilename);
 			}
-
 		}else{
-			// SAVE AS: CREATE A NEW PAGE
+			// Either the user does not own the page, or they chose save as.
 			$page = new Page();
 			$page->name = $output['name'];
 			$page->book_id = $originalPage->user_id === Auth::id() ? $output['book_id'] : null;
@@ -166,16 +151,19 @@ class PageController extends Controller
 				$this->saveThumb(self::IMAGE_DIR . $outlineFilename, $outlineFilename);
 				$page->outline_url = $outlineFilename;
 			}
-
 		}
-
 
 		$page->colored_url = $output['saveOutline'] ? null : $filename;
 		$page->save();
-
 		return response()->json(['result'=>true, 'id'=>$page->id ]);
 	}
 
+	/**
+	 * Saves a base64 image.
+	 *
+	 * @param  string $img
+	 * @return string filename.
+	 */
 	private function saveUploadedBase64Image($img, $filename = ''){
 		$filename = $filename ? $filename : uniqid() . '.png';
 		$img = str_replace('data:image/png;base64,', '', $img);
@@ -186,6 +174,13 @@ class PageController extends Controller
 		return $filename;
 	}
 
+	/**
+	 * Saves a thumbnail.
+	 *
+	 * @param  string $path
+	 * @param  string $filename
+	 * @return string filename.
+	 */
 	private function saveThumb($path, $filename){
 		\Image::make($path)
 			->heighten(self::THUMB_HEIGHT)
@@ -196,8 +191,14 @@ class PageController extends Controller
 	}
 
 
+	/**
+	 * Validate the request for the saveColoringPage method.
+	 *
+	 * @param  $input - Associative array keyed by the name.
+	 * @return $output - Associative array with clean values and errors if necessary.
+	 */
 	private function validateSaveColoringPage($input){
-		if($input['book_id'] === 'null'){
+		if($input['book_id'] === 'null'){ // if the book_id comes as null, convert it to a real null.
 			$input['book_id'] = null;
 		}
 
@@ -225,11 +226,15 @@ class PageController extends Controller
 		CustomValidator::validateField($input, $output, $defaults, 'saveAs', 'required|numeric', 'Invalid value for "Save As".', true);  
 		CustomValidator::validateField($input, $output, $defaults, 'saveOutline', 'required|numeric', 'Invalid value for "Save Outline".', true);  
 
-
 		return $output;
 	}
 
-
+	/**
+	 * Moves the coloring page to a new book. Used with drag/drop.
+	 *
+	 * @param  $input - Associative array keyed by the name.
+	 * @return json with result or errors.
+	 */
 	public function moveColoringPage(Request $request)
 	{
 		$output = $this->validateMoveColoringPage($request->all());
@@ -248,7 +253,12 @@ class PageController extends Controller
 		return response()->json(['result'=>true]);
 	}
 
-
+	/**
+	 * Validates the input for moveColoringPage.
+	 *
+	 * @param  $input - Associative array keyed by the name.
+	 * @return $output - Associative array with clean values and errors if necessary.
+	 */
 	private function validateMoveColoringPage($input){
 		if($input['book_id'] === 'null'){
 			$input['book_id'] = null;
@@ -269,14 +279,6 @@ class PageController extends Controller
 		return $output;
 	}
 
-
-
-
-
-
-
-
-
 	/**
 	 * Display the specified resource.
 	 *
@@ -293,29 +295,6 @@ class PageController extends Controller
 		}
 
 		return view('page')->with(['page' => $page ]);
-	}
-
-	/**
-	 * Show the form for editing the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
-	public function edit($id)
-	{
-		//
-	}
-
-	/**
-	 * Update the specified resource in storage.
-	 *
-	 * @param  \Illuminate\Http\Request  $request
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
-	public function update(Request $request, $id)
-	{
-		//
 	}
 
 	/**
@@ -336,7 +315,12 @@ class PageController extends Controller
         return response()->json(['result'=> true ]);
 	}
 
-
+	/**
+	 * Returns a user's page or public page.
+	 *
+	 * @param  int  $book_id
+	 * @return bool $allowPublicBooks - Indicates if public books should be returned
+	 */
 	private function getAuthenticatedPage($page_id, $allowPublicBooks = false){
 		$page = Page::with('book')->find($page_id);
 		if( !$page_id || ($allowPublicBooks && $page->book &&  $page->book->is_public) || ($page->user_id === Auth::id())){

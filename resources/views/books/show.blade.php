@@ -12,9 +12,9 @@
 	@each('partials.page', $pages, 'page')
 
 	@if(!Auth::guest())
-	<span class="page add-page" onclick="app.showEditPage()">
+	<span class="page add-page" onclick="app.showAddPage()">
 		<i class="fa fa-plus-circle" aria-hidden="true"></i>
-		<span >New Coloring Page</span>
+		<span>New Coloring Page</span>
 	</span>
 	@endif
 

@@ -16,161 +16,135 @@ use DB;
 
 class BookController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        $books = Book::where('user_id', '=', 1)->get();
-        $my_books = Book::where('user_id', '=', Auth::id())->get();
+	/**
+	 * Display a listing of books, user books, and any user pages that do not have a book.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function index()
+	{
+		list($books, $my_books) = Book::getPublicBooksAndUserBooks();
+		$my_pages = Page::getUserPagesWithNoBooks();
+		return view('books.index')->with(['books' => $books, 'my_books' => $my_books, 'my_pages' => $my_pages]);
+	}
 
-        $book_ids = $books->pluck('id');
-        $my_books_ids = $my_books->pluck('id');
+	/**
+	 * Store a newly created resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @return \Illuminate\Http\Response
+	 */
+	public function store(Request $request)
+	{
+		$output = $this->validateStore($request->all());
 
-        $ids = array_merge($book_ids->toArray(), $my_books_ids->toArray());
+		if(count($output['errors'])){
+			return response()->json($output);
+		}
 
-        $place_holders = implode(',', array_fill(0, count($ids), '?'));
+		$book = new Book();
+		$book->name = $output['name'];
+		$book->user_id = Auth::id();
+		$book->save();
+		return response()->json(['book'=>$book]);
+	}
 
+	 /**
+	 * Validate the request for the store method.
+	 *
+	 * @param  $input - Associative array keyed by the name.
+	 * @return $output - Associative array with clean values and errors if necessary.
+	 */
+	private function validateStore($input){
+		$defaults = [
+			'name' => ''
+		];
 
-        $pages =  DB::select('SELECT * FROM pages where book_id in (' .  $place_holders . ')', $ids );
-
-       // dd($book_ids->toArray() + $my_books_ids->toArray());
-
-
-        $pages = collect($pages)->keyBy('book_id')->toArray();
-
-
-
-        foreach($books as $book){
-            if(array_key_exists($book->id, $pages)){
-                $book->cover = $pages[$book->id];
-            }
-        }
-
-        foreach($my_books as $book){
-            if(array_key_exists($book->id, $pages)){
-                $book->cover = $pages[$book->id];
-            }
-        }
-
-        $my_pages = Page::where('user_id', '=', Auth::id())->whereNull('book_id')->get();
-
-        return view('books.index')->with(['books' => $books, 'my_books' => $my_books, 'my_pages' => $my_pages]);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $output = $this->validateStore($request->all());
-
-        if(count($output['errors'])){
-            return response()->json($output);
-        }
-
-        $book = new Book();
-        $book->name = $output['name'];
-        $book->user_id = Auth::id();
-        $book->save();
-        return response()->json(['book'=>$book]);
-    }
-
-    private function validateStore($input){
-        $defaults = [
-            'name' => ''
-        ];
-
-        $input = array_merge($defaults, $input);
-        $output = []; // Output are variables that will be available to the html page.
-        $output['errors'] = [];
-        CustomValidator::validateField($input, $output, $defaults, 'name', 'required|string|max:255', 'Invalid value for name.');        
-        return $output;
-    }
+		$input = array_merge($defaults, $input);
+		$output = []; // Output are variables that will be available to the html page.
+		$output['errors'] = [];
+		CustomValidator::validateField($input, $output, $defaults, 'name', 'required|string|max:255', 'Invalid value for name.');        
+		return $output;
+	}
 
 
+	/**
+	 * Displays a public book, or a user's own book.
+	 *
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function show($book_id)
+	{
+		$book = $this->getAuthenticatedBook($book_id, true); // True is passed in to allow public books.
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($book_id)
-    {
-       
-        $book = $this->getAuthenticatedBook($book_id, true);
+		if(is_null($book)) { // Validate the book is valid.
+			Session::flash('flash_message','Book not found');
+			return redirect('/books');
+		}
 
-        if(is_null($book)) {
-            Session::flash('flash_message','Book not found');
-            return redirect('/books');
-        }
+		$pages = Page::where('book_id', '=', $book_id)->orderBy('name')->get(); // Get all the pages for the book.
+		return view('books.show')->with(['pages' => $pages, 'book'=> $book]);
+	}
 
-        $pages = Page::where('book_id', '=', $book_id)->orderBy('name')->get();
-        return view('books.show')->with(['pages' => $pages, 'book'=> $book]);
-    }
+	/**
+	 * Update the specified resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function update(Request $request, $id)
+	{
+		$output = $this->validateStore($request->all());
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        $output = $this->validateStore($request->all());
+		if(count($output['errors'])){
+			return response()->json($output);
+		}
 
-        if(count($output['errors'])){
-            return response()->json($output);
-        }
+		$book = $this->getAuthenticatedBook($id);
 
-        $book = $this->getAuthenticatedBook($id);
+		if(is_null($book)) {
+			return response()->json(['errors'=> ['You do not have permission to update this book.'] ]);
+		}
 
-        if(is_null($book)) {
-            return response()->json(['errors'=> ['You do not have permission to update this book.'] ]);
-        }
+		$book->name = $output['name'];
+		$book->save();
+		return response()->json(['book'=>$book]);
+	}
 
-        $book->name = $output['name'];
-        $book->save();
-        return response()->json(['book'=>$book]);
-    }
+	/**
+	 * Remove the specified resource from storage.
+	 *
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function destroy($id)
+	{
+		$book = $this->getAuthenticatedBook($id);
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        $book = $this->getAuthenticatedBook($id);
+		if(is_null($book)) {
+			return response()->json(['errors'=> ['You do not have permission to delete this book.'] ]);
+		}
 
-        if(is_null($book)) {
-            return response()->json(['errors'=> ['You do not have permission to delete this book.'] ]);
-        }
+		DB::table('pages')->where('book_id', $id)->update(['book_id' => null]); // Remove this book from all pages associated with it.
 
-        DB::table('pages')
-            ->where('book_id', $id)
-            ->update(['book_id' => null]);
+		$book->delete();
+		return response()->json(['result'=> true ]);
+	}
 
-
-        $book->delete();
-        return response()->json(['result'=> true ]);
-    }
-
-
-    private function getAuthenticatedBook($book_id, $allowPublicBooks = false){
-        $book = Book::find($book_id);
-        if( ($allowPublicBooks && $book->is_public) || ($book->user_id === Auth::id())){
-            return $book;
-        }
-        return null;
-    }
+	/**
+	 * Returns a user's book or public book.
+	 *
+	 * @param  int  $book_id
+	 * @return bool $allowPublicBooks - Indicates if public books should be returned
+	 */
+	private function getAuthenticatedBook($book_id, $allowPublicBooks = false){
+		$book = Book::find($book_id);
+		if( ($allowPublicBooks && $book->is_public) || ($book->user_id === Auth::id())){
+			return $book;
+		}
+		return null;
+	}
 
 }

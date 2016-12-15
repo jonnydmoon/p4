@@ -10,6 +10,8 @@
                     <form class="form-horizontal" role="form" method="POST" action="{{ url('/my-account') }}">
                         {{ csrf_field() }}
 
+                        <input name="_method" type="hidden" value="PUT">
+
                         <div class="form-group">
                             <label for="name" class="col-md-4 control-label">Name</label>
 
@@ -28,7 +30,6 @@
                         </div>
 
                         <label class="update-password-label" for="update_password">Change Password</label> <input type="checkbox" name='update_password' class='update-password' {{ $update_password == 'on' ? 'checked="true"' : '' }} />
-
                         <div>
 
                             <div class="form-group">

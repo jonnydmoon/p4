@@ -1,3 +1,12 @@
+// This file has been greatly modified from the original version 
+// (https://github.com/williammalone/Simple-Drawing-App-with-Bucket-Tool/blob/master/drawing-app-with-bucket.js).
+// The file started as the basis for writing this drawing app. William Malone posted
+// a great tutorial on how to create a basic html canvas drawing app 
+// (http://www.williammalone.com/projects/html5-canvas-javascript-drawing-app-with-bucket-tool/).
+// I've modified it to add more features and reorganize it in a way that I found
+// more fitting for my website. - Jonny Moon
+
+
 // Copyright 2012 William Malone (www.williammalone.com)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,11 +25,7 @@
 /*global G_vmlCanvasManager */
 
 var drawingApp = (function () {
-
 	"use strict";
-
-
-
 
 	var contexts = {},
 		context,
@@ -28,34 +33,22 @@ var drawingApp = (function () {
 		canvasHeight = 260,
 		outlineImage = new Image(),
 		coloredImage = new Image(),
-		crayonTextureImage = new Image(),
 		paint = false,
 		mouseDown = false,
 		ctrlKey,
 		shiftKey,
 		curTool = "marker",
+		curColor,
 		sizeLineStartY = 228,
 		resourcesLoadingCount = 0,
 		colorLayerData,
 		outlineLayerData,
-		colorGreen = {
-			r: 101,
-			g: 155,
-			b: 65
-		},
 		curSize = 20,
-		curColor = colorGreen,
 		currentClick = null,
 		lastClick = null,
 		lastClickForShift = null,
-		lastMid = null,
-		midPt = null,
-		z = 0,
 
 		addClick = function (x, y, dragging) {
-			//z++;
-			//if(z%10 !==0){return;}
-
 			lastClick = currentClick;
 
 			currentClick = {
@@ -63,24 +56,15 @@ var drawingApp = (function () {
 				y:y,
 				dragging:dragging
 			};
-
-
-			//lastMid = lastMid || currentClick;
-			//midPt = lastMid;
-			//lastMid ={x: currentClick.x + ( (currentClick.x - lastClick.x) >> 1), y: currentClick.y + ( (currentClick.y - lastClick.y) >> 1)};
-
-
 		},
 
 		// Redraws the canvas.
 		redraw = function () {
-
 			// Make sure required resources are loaded before redrawing
 			if (resourcesLoadingCount) {
 				return;
 			}
 
-			
 			if (curTool === "bucket") {
 				// Draw the current state of the color layer to the canvas
 				contexts.drawing.putImageData(colorLayerData, 0, 0, 0, 0, contexts.drawing.canvas.width, contexts.drawing.canvas.height);
@@ -101,10 +85,7 @@ var drawingApp = (function () {
 
 		// Start painting with paint bucket tool starting from pixel specified by startX and startY
 		paintAt = function (startX, startY) {
-
-
 			colorLayerData = contexts.drawing.getImageData(0, 0, canvasWidth, canvasHeight);
-
 
 			var pixelPos = (startY * contexts.drawing.canvas.width + startX) * 4,
 				r = colorLayerData.data[pixelPos],
@@ -172,12 +153,8 @@ var drawingApp = (function () {
 					var mouseX = (e.changedTouches ? e.changedTouches[0].pageX : e.pageX) - this.offsetLeft,
 						mouseY = (e.changedTouches ? e.changedTouches[0].pageY : e.pageY) - this.offsetTop;
 
-
-					//console.log("Mouse", mouseX, mouseY);	
-
 					ctrlKey = e.ctrlKey || e.metaKey;
 					shiftKey = e.shiftKey ? {x: e.pageX - this.offsetLeft, y:e.pageY - this.offsetTop} : false;
-					console.log('shiftKey', shiftKey);
 
 					if (curTool === "bucket") {
 						// Mouse click location on drawing area
@@ -261,20 +238,15 @@ var drawingApp = (function () {
 		},
 
 		
-
 		init = function(id, width, height, baseAssetUrl, outlineUrl, colorUrl){
 			outlineImage.onload = function () {
 				outlineImage.onload = null;
-				//console.log('LOADED', outlineImage.width, outlineImage.height);
 
 				var outlineHeight = outlineImage.height;
 				var outlineWidth = outlineImage.width;
-
 				var $canvas = $('#' + id);
 				var availableHeight = $canvas.height();
 				var availableWidth = $canvas.width();
-
-
 				var outlineRatio = outlineHeight/outlineWidth;
 				var availableRatio = availableHeight/availableWidth;
 
@@ -297,21 +269,13 @@ var drawingApp = (function () {
 
 		},
 
-
+		// This needs to execute after init finishes.
 		// Creates a canvas element, loads images, adds events, and draws the canvas for the first time.
 		init2 = function (id, width, height, baseAssetUrl, outlineUrl, colorUrl) {
-
-
-			//width = window.innerWidth - 1;
-			//height = window.innerHeight - 1;
-
-
 
 			canvasWidth = width;
 			canvasHeight = height;
 			
-
-
 			// Create the canvas (Neccessary for IE because it doesn't know what a canvas element is)
 			context = addCanvas({width:canvasWidth, height:canvasHeight, id:'gui', divId: id});
 			contexts.drawing = addCanvas({width:canvasWidth, height:canvasHeight, id:'drawing', divId: id});
@@ -319,16 +283,7 @@ var drawingApp = (function () {
 			contexts.outline = addCanvas({width:canvasWidth, height:canvasHeight, id:'outline', divId: id});
 
 			resourcesLoadingCount++;
-			crayonTextureImage.onload = function () {
-				contexts.texture.drawImage(crayonTextureImage, 0, 0, canvasWidth, canvasHeight);
-				resourceLoaded();
-			};
-			crayonTextureImage.src = baseAssetUrl + "/crayon-texture.png";
-
-
-			resourcesLoadingCount++;
 			outlineImage.onload = function () {
-
 				contexts.outline.drawImage(outlineImage, 0, 0, canvasWidth,  canvasHeight);
 				// Test for cross origin security error (SECURITY_ERR: DOM Exception 18)
 				try {
@@ -346,7 +301,6 @@ var drawingApp = (function () {
 				resourceLoaded();
 			};
 			outlineImage.src = outlineUrl;
-
 
 			if(!colorUrl){
 				return;
@@ -368,10 +322,6 @@ var drawingApp = (function () {
 				resourceLoaded();
 			};
 			coloredImage.src = colorUrl;
-
-
-
-
 		};
 
 	return {
@@ -395,19 +345,10 @@ var drawingApp = (function () {
 			
 		},
 		swapColors: function(){
-			
 			var canvas = merge2( $('canvas#outline,canvas#drawing') );
 			var mergedContext = canvas.getContext("2d");;
 			var mergedContextLayerData = mergedContext.getImageData(0, 0, canvasWidth, canvasHeight);
-			
-			
 			swapColors(contexts.outline, mergedContextLayerData);
-
-			//swapColors(mergedContext, mergedContextLayerData);
-			//swapColors(contexts.outline, mergedContextLayerData); 
-			// show it on the canvas
-			//$('#drawing').hide();
-
 		},
 		save: function(){
 			return $('canvas#drawing').get(0).toDataURL();
@@ -416,12 +357,10 @@ var drawingApp = (function () {
 			return merge2( $('canvas#outline,canvas#drawing') ).toDataURL();
 		},
 		saveOutline: function(){
-
 			var mergedCanvas = merge2( $('canvas#outline,canvas#drawing') );
 			var mergedContext = mergedCanvas.getContext("2d");;
 			var mergedContextLayerData = mergedContext.getImageData(0, 0, canvasWidth, canvasHeight);
 			swapColors(mergedContext, mergedContextLayerData);
-
 			return mergedCanvas.toDataURL();
 		}
 	};
@@ -461,8 +400,6 @@ var drawingApp = (function () {
 				setColor(pixel, r, blackColor); 
 			} // Set dark colors to black
 			else{  setColor(pixel, r, transparentColor); }
-
-			
 		}); 
 	}
 
@@ -480,11 +417,10 @@ var drawingApp = (function () {
 				pixel[b] > oldColor.b - fuzziness && pixel[b] < oldColor.b + fuzziness &&
 				pixel[a] > oldColor.a - fuzziness && pixel[a] < oldColor.a + fuzziness ) // if white then change alpha to 0
 			{
-				//console.log('changing'); 
-				pixel[p+r] = newColor.r; // Make it transparent
-				pixel[p+g] = newColor.g; // Make it transparent
-				pixel[p+b] = newColor.b; // Make it transparent
-				pixel[p+a] = newColor.a; // Make it transparent
+				pixel[p+r] = newColor.r;
+				pixel[p+g] = newColor.g;
+				pixel[p+b] = newColor.b;
+				pixel[p+a] = newColor.a;
 			}
 		}
 
@@ -493,78 +429,40 @@ var drawingApp = (function () {
 		var r=0, g=1, b=2,a=3;
 
 		for (var p = 0; p<pixel.length; p+=4){
-	      	pixelHandler(pixel, p+r, p+g, p+b, p+a);
-	    }
+			pixelHandler(pixel, p+r, p+g, p+b, p+a);
+		}
 
-	    destinationContext.putImageData(contextData, 0, 0, 0, 0, destinationContext.canvas.width, destinationContext.canvas.height);
+		destinationContext.putImageData(contextData, 0, 0, 0, 0, destinationContext.canvas.width, destinationContext.canvas.height);
 	}
-
-
-
-
-	function swapColorsOld(context, contextData, oldColor, newColor, fuzziness){
-		fuzziness = fuzziness || 150;
-		oldColor = oldColor || { r: 255, g: 255, b: 255, a:255 }
-		newColor = newColor || { r: 0, g: 0, b: 0, a:0 }
-		
-		//fuzziness = 150;
-		//oldColor = { r: 0, g: 0, b: 0, a:255 }
-		//newColor = { r: 0, g: 0, b: 0, a:255 }
-
-
-		var pixel = contextData.data;
-		var r=0, g=1, b=2,a=3;
-
-		for (var p = 0; p<pixel.length; p+=4)
-	    {
-	      	if (
-				pixel[p+a] > oldColor.a - fuzziness && pixel[p+a] < oldColor.a + fuzziness &&
-				pixel[p+r] > oldColor.r - fuzziness && pixel[p+r] < oldColor.r + fuzziness &&
-				pixel[p+g] > oldColor.g - fuzziness && pixel[p+g] < oldColor.g + fuzziness &&
-				pixel[p+b] > oldColor.b - fuzziness && pixel[p+b] < oldColor.b + fuzziness) // if white then change alpha to 0
-			{
-				//console.log('changing'); 
-				pixel[p+r] = newColor.r; // Make it transparent
-				pixel[p+g] = newColor.g; // Make it transparent
-				pixel[p+b] = newColor.b; // Make it transparent
-				pixel[p+a] = newColor.a; // Make it transparent
-			}
-	    }
-
-	    context.putImageData(contextData, 0, 0, 0, 0, context.canvas.width, context.canvas.height);
-	}
-
 
 	function clearContext(context){
 		context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 	}
 
-
 	// From: http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 	function componentToHex(c) {
-	    var hex = c.toString(16);
-	    return hex.length == 1 ? "0" + hex : hex;
+		var hex = c.toString(16);
+		return hex.length == 1 ? "0" + hex : hex;
 	}
 
 	function rgbToHex(r, g, b) {
-	    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+		return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 	}
 
 	function hexToRgb(hex) {
-	    // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-	    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-	    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
-	        return r + r + g + g + b + b;
-	    });
+		// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+		var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+		hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+			return r + r + g + g + b + b;
+		});
 
-	    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-	    return result ? {
-	        r: parseInt(result[1], 16),
-	        g: parseInt(result[2], 16),
-	        b: parseInt(result[3], 16)
-	    } : null;
+		var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+		return result ? {
+			r: parseInt(result[1], 16),
+			g: parseInt(result[2], 16),
+			b: parseInt(result[3], 16)
+		} : null;
 	}
-
 
 	function addCanvas(params){
 		var canvasElement = document.createElement('canvas');
@@ -591,8 +489,6 @@ var drawingApp = (function () {
 	}
 
 	function matchStartColor (outlineLayerData, colorLayerData, pixelPos, startR, startG, startB) {
-
-
 		var r = outlineLayerData.data[pixelPos],
 			g = outlineLayerData.data[pixelPos + 1],
 			b = outlineLayerData.data[pixelPos + 2],
@@ -626,13 +522,10 @@ var drawingApp = (function () {
 		return (Math.abs(r - startR) + Math.abs(g - startG) + Math.abs(b - startB) < 10 && a > 240  ); // USED TO BE 255
 	}
 
-
 	function floodFill (outlineContext, colorContext, outlineLayerData, colorLayerData, startX, startY, startR, startG, startB) {
 
 		var canvasWidth = colorContext.canvas.width;
 		var canvasHeight = colorContext.canvas.height;
-
-		//console.log('x', startX, 'y', startY, canvasWidth, canvasHeight)
 
 		var newPos,
 			x,
@@ -670,14 +563,9 @@ var drawingApp = (function () {
 
 			// Go down as long as the color matches and in inside the canvas
 			while (y <= drawingBoundBottom && matchStartColor(outlineLayerData, colorLayerData, pixelPos, startR, startG, startB)) {
-				
-
-				
-
 				y += 1;
 
 				colorPixel(colorLayerData, pixelPos, curColor.r, curColor.g, curColor.b);
-
 
 				if (x > drawingBoundLeft) {
 					if (matchStartColor(outlineLayerData, colorLayerData, pixelPos - 4, startR, startG, startB)) {
@@ -734,11 +622,6 @@ var drawingApp = (function () {
 			shiftKey = null;
 		}
 
-		//console.log(midPt.x, midPt.y, currentClick.x, currentClick.y);
-
-		//context.quadraticCurveTo(midPt.x, midPt.y, currentClick.x, currentClick.y);
-
-
 		context.lineTo(currentClick.x, currentClick.y);
 
 		// Set the drawing color
@@ -746,7 +629,6 @@ var drawingApp = (function () {
 
 			context.globalCompositeOperation = "destination-out";
 			context.strokeStyle = "rgba(0,0,0,1)";
-
 
 			if(ctrlKey){
 
@@ -770,13 +652,9 @@ var drawingApp = (function () {
 				contexts.outline.closePath();
 				contexts.outline.globalCompositeOperation ="source-over";
 			}
-
-
-
 		} else {
 			context.globalCompositeOperation ="source-over";
 			context.strokeStyle = "rgb(" + curColor.r + ", " + curColor.g + ", " + curColor.b + ")";
-			//context.strokeStyle = "rgba(" + curColor.r + ", " + curColor.g + ", " + curColor.b + ", 0.1)";
 		}
 
 		context.lineCap = "round";
@@ -784,10 +662,7 @@ var drawingApp = (function () {
 		context.lineWidth = curSize;
 		context.stroke();
 		context.closePath();
-
-
 	}
-
 
 	//http://www.benknowscode.com/2012/10/html-canvas-imagedata-creating-layers_9883.html
 	function merge2(layers)
@@ -809,9 +684,5 @@ var drawingApp = (function () {
 
 		return tmpc;
 	}
- 
-	//var merged_canvas = merge2($('canvas'));
-	//$('#mergeimg')[0].src = merged_canvas.toDataURL();
-
 
 }());
