@@ -521,6 +521,12 @@ button.btn {
 	margin-left:20px;
 }
 
+.about-video iframe{
+	border:0;
+	width:672px;
+	height:378px; 
+}
+
 blockquote{
 	font-size:14px;
 }

@@ -7,7 +7,7 @@
 @section('content')
 	<div class="about-page">
 		<div class="about-video">
-			<iframe width="560" height="315" src="https://www.youtube.com/embed/8AnRLG702Og" frameborder="0" allowfullscreen></iframe>
+			<iframe src="https://www.youtube.com/embed/8AnRLG702Og" allowfullscreen></iframe>
 		</div>
 
 		<h4>Coloring Pages provide fun and relaxing entertainment for all ages.</h4>
